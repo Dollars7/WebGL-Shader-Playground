@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<style>
+		body {
+			font-family: verdana;
+			line-height: 150%;
+		}
+	</style>
+
+	<script id="vertex-shader" type="x-shader/x-vertex">
+
+attribute vec3 vPosition;
+attribute vec3 vNormal;
+
+uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec4 lightPosition;
+
+uniform float transX; 
+uniform float transY; 
+uniform float transZ; 
+
+uniform float sizeX;
+uniform float sizeY;
+uniform float sizeZ;
+
+varying vec3 N;
+varying vec3 L;
+varying vec3 E;
+
+void main()
+{
+
+	// make inputs 4d to match 4x4 transformation matrix
+	vec4 pos4D = vec4(vPosition, 1.0);
+	vec4 nor4D = vec4(vNormal, 0.0); 
+	
+	// map position into eye coordinates
+	vec3 pos = (modelViewMatrix * pos4D).xyz;
+	
+	// light defined  in eye coordinates
+    vec3 light = lightPosition.xyz;
+	
+	// light vector
+    L = normalize( light - pos );
+	
+	// eye in eye coordinates
+	vec3 eyePoint = vec3(0.0, 0.0, 0.0);
+	
+	// view vector
+	// this was an error - redeclaring E, so not varying
+	E = normalize( eyePoint - pos );
+   
+   // map normal into eye coordinates
+   // normal matrix should not be needed here bc it is a rotation and translation (rigid body)
+    N = normalize( (modelViewMatrix * nor4D).xyz); 
+
+	
+	mat4 t = mat4( 1.0, 0.0, 0.0, 0.0,
+					0.0, 1.0, 0.0, 0.0,
+					0.0, 0.0, 1.0, 0.0,
+					transX, transY, transZ, 1.0);
+
+	mat4 expand = mat4(
+		sizeX, 0.0, 0.0, 0.0,
+		0.0, sizeY, 0.0, 0.0,
+		0.0, 0.0, sizeZ, 0.0,
+		0.0, 0.0, 0.0, 1.0);
+    
+	// output point in clip coordinates
+	if(pos4D.x == 1.0 || pos4D.x == -1.0 || pos4D.y == 1.0 || pos4D.y == -1.0 || pos4D.z == 1.0 || pos4D.z == -1.0){
+		gl_Position = projectionMatrix * modelViewMatrix * pos4D;
+	}else{
+		gl_Position = t * expand * projectionMatrix * modelViewMatrix * pos4D;
+	}
+    
+	
+    
+}
+</script>
+
+	<script id="fragment-shader" type="x-shader/x-fragment">
+
+precision mediump float;
+uniform vec4 ambientProduct;
+uniform vec4 diffuseProduct;
+uniform vec4 specularProduct;
+uniform float shininess;
+
+varying vec3 N;
+varying vec3 L;
+varying vec3 E;
+uniform int shadingModel;
+
+void main()
+{    
+    vec4 fColor;
+
+	// normalize the input vectors that have been
+	// interpolated across the triangle
+
+	vec3 unitN = normalize(N);
+	vec3 unitL = normalize(L);
+	vec3 unitE = normalize(E);
+	
+	// halfway vector (instead of reflection vector)
+	vec3 H = normalize( unitL + unitE );
+	vec4 finalColor;
+	if( shadingModel == 1){
+	float LNdotProduct = dot(unitL, unitN);
+    float Kd = max(LNdotProduct, 0.0);
+    float Ks = pow(max(dot(H, unitN), 0.0), shininess);
+
+    finalColor = ambientProduct + Kd * diffuseProduct * max(LNdotProduct, 0.0) + Ks * specularProduct;
+	}else{
+		vec4 ambient = ambientProduct;
+		// diffuse attenuation (Lambert's law)
+		float LNdotProduct = dot(unitL, unitN);
+		float Kd = max( LNdotProduct, 0.0 );
+		vec4  diffuse = Kd*diffuseProduct;
+
+		// specular attenuation
+		float Ks = pow( max(dot(unitN, H), 0.0), shininess );
+		vec4  specular = Ks * specularProduct;
+		// turn off specular if there is no diffuse
+
+		if( LNdotProduct < 0.0 )
+			specular = vec4(0.0, 0.0, 0.0, 1.0);
+
+		// create working color
+		// so we can play before loading into fColor
+		finalColor = ambient + diffuse + specular;
+	}
+
+	fColor = finalColor;
+	fColor.a = 1.0;
+    gl_FragColor = fColor;
+}
+</script>
+	<script type="text/javascript" src="../Common/webgl-utils.js"></script>
+	<script type="text/javascript" src="../Common/initShaders.js"></script>
+	<script type="text/javascript" src="../Common/MV.js"></script>
+	<script type="text/javascript" src="Pei_HW3_Shaded.js"></script>
+	<script type="text/javascript" src="mousy.js"></script>
+</head>
+
+<body>
+
+	<canvas id="gl-canvas" width="512" height="512" style="border:2px solid #000000;">
+		Oops ... your browser doesn't support the HTML5 canvas element
+	</canvas>
+
+	<h1>Homework 3: Floating Surface</h1>
+	<div>
+		<p> You will develop an applica�on that displays a parametric surface with Phong shading. The 
+			surface travels around a bounding box, bumping off the faces and deforming based on its loca�on. The 
+			user can toggle the anima�on on/off and choose between two surfaces. The user can choose their view 
+			with mouse interac�ons. The user can choose between two material types and two light loca�ons.
+		</p>
+
+		<div>
+
+			<div>
+				<strong>Change the parametric surface: </strong>
+				<button id="surface1">Torus</button>
+				<button id="surface2">Cube</button>
+				<button id="surface3">Sphere</button><br>
+			</div>
+
+			<div>
+				<strong>Change the light position: </strong>
+				<button id="lightPositionButton1"> one at the eye </button>
+				<button id="lightPositionButton2"> one is another </button><br>
+			</div>
+			<div>
+				<br>
+				<strong>Light location: </strong><span id="lightLocation"></span>
+				<br>
+			</div>
+			<div>
+				<strong>Change the material: </strong>
+				<button id="material1">Phong with golden-yellow</button>
+				<button id="material2">Gouraud with golden-yellow</button><br>
+			</div>
+			<div>
+				<strong>Change the light color: </strong>
+				<button id="lightColor1">gold-yellow with Phong</button>
+				<button id="lightColor2">red with Phong</button><br>
+			</div>
+			<div>
+				<strong> Change the view: </strong>
+				<button id="OrthographicButton">Orthographic</button>
+				<button id="perspectiveButton">perspective projection</button><br>
+			</div>
+
+
+			<div>
+				 by Ailun Pei
+			</div>
+</body>
+
+</html>
