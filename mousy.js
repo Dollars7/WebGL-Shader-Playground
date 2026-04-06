@@ -91,17 +91,17 @@ function mouseControls() {
 			var deltaX = event.clientX - mouse.prevX;
 			var deltaY = event.clientY - mouse.prevY;
 			
-			console.log("enter onmousemove with left/right button down");
-			console.log("viewer.eye = ",viewer.eye,"  viewer.at=",viewer.at,"  viewer.up=",viewer.up);
-			console.log("event clientX = ",currentX,"  clientY = ",currentY);
-			console.log("mouse.prevX = ",mouse.prevX,"  prevY = ",mouse.prevY);
-			console.log("\n\nchange in mouse location deltaX = ",deltaX,"  deltaY = ",deltaY);
+			// console.log("enter onmousemove with left/right button down");
+			// console.log("viewer.eye = ",viewer.eye,"  viewer.at=",viewer.at,"  viewer.up=",viewer.up);
+			// console.log("event clientX = ",currentX,"  clientY = ",currentY);
+			// console.log("mouse.prevX = ",mouse.prevX,"  prevY = ",mouse.prevY);
+			// console.log("\n\nchange in mouse location deltaX = ",deltaX,"  deltaY = ",deltaY);
 
 			// Compute camera rotation on left click and drag
 			if (mouse.leftDown)
 			{
-				console.log("onmousemove and leftDown is true");
-				console.log("theta=",viewer.theta,"  phi=",viewer.phi);
+				// console.log("onmousemove and leftDown is true");
+				// console.log("theta=",viewer.theta,"  phi=",viewer.phi);
 				
 				// Perform rotation of the camera
 				//
@@ -115,7 +115,7 @@ function mouseControls() {
 					viewer.theta += mouse.scale * deltaX;
 					viewer.phi -= mouse.scale * deltaY;
 				}
-				console.log("incremented theta=",viewer.theta,"  phi=",viewer.phi);
+				// console.log("incremented theta=",viewer.theta,"  phi=",viewer.phi);
 				
 				// Wrap the angles
 				var twoPi = 6.28318530718;
@@ -136,12 +136,12 @@ function mouseControls() {
 				{
 					viewer.phi += twoPi;
 				}
-				console.log("wrapped  theta=",viewer.theta,"  phi=",viewer.phi);
+				// console.log("wrapped  theta=",viewer.theta,"  phi=",viewer.phi);
 
 			} // end mouse.leftdown
 			else if(mouse.rightDown)
 			{
-				console.log("onmousemove and rightDown is true");
+				// console.log("onmousemove and rightDown is true");
 				
 				// Perform zooming; don't get too close           
 				viewer.radius -= mouse.scale * deltaX;
@@ -186,16 +186,12 @@ function mouseControls() {
 			}
 			//console.log("up = ",viewer.up[0],viewer.up[1],viewer.up[2]);
 			//console.log("update viewer.eye = ",viewer.eye,"  viewer.at=",viewer.at,"  viewer.up=",viewer.up);
-			
-			
 
 			mouse.prevX = currentX;
 			mouse.prevY = currentY;
 			
-
-			
-			console.log("onmousemove: made change");
-			console.log("viewer.eye = ",viewer.eye,"  viewer.at=",viewer.at,"  viewer.up=",viewer.up);
+			// console.log("onmousemove: made change");
+			// console.log("viewer.eye = ",viewer.eye,"  viewer.at=",viewer.at,"  viewer.up=",viewer.up);
 		
 		} // end if button down
 
