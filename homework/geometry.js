@@ -344,32 +344,62 @@ function initSkybox() {
 }
 
 function quad(a, b, c, d, is_up) {
+  // Calculate normal vector using cross product
+  var v1 = subtract(plane[b], plane[a]);
+  var v2 = subtract(plane[c], plane[a]);
+  var normal = normalize(cross(v1, v2));
+  
   if (is_up == true) {
+    // Platform top face - normal should point up (0, 1, 0)
+    normal = vec3(0, 1, 0);
+    
     pointsArray.push(plane[a]);
+    normalsArray.push(normal);
     texCoordArray.push(vec3(0, 0, 1));
+    
     pointsArray.push(plane[b]);
+    normalsArray.push(normal);
     texCoordArray.push(vec3(1, 0, 1));
+    
     pointsArray.push(plane[c]);
+    normalsArray.push(normal);
     texCoordArray.push(vec3(1, 1, 1));
+    
     pointsArray.push(plane[a]);
+    normalsArray.push(normal);
     texCoordArray.push(vec3(0, 0, 1));
+    
     pointsArray.push(plane[c]);
+    normalsArray.push(normal);
     texCoordArray.push(vec3(1, 1, 1));
+    
     pointsArray.push(plane[d]);
+    normalsArray.push(normal);
     texCoordArray.push(vec3(0, 1, 1));
   }
   if (is_up == false) {
     pointsArray.push(plane[a]);
+    normalsArray.push(normal);
     texCoordArray.push(vec3(0, 0, 2.0));
+    
     pointsArray.push(plane[b]);
+    normalsArray.push(normal);
     texCoordArray.push(vec3(0, 0, 2.0));
+    
     pointsArray.push(plane[c]);
+    normalsArray.push(normal);
     texCoordArray.push(vec3(0, 0, 2.0));
+    
     pointsArray.push(plane[a]);
+    normalsArray.push(normal);
     texCoordArray.push(vec3(0, 0, 2.0));
+    
     pointsArray.push(plane[c]);
+    normalsArray.push(normal);
     texCoordArray.push(vec3(0, 0, 2.0));
+    
     pointsArray.push(plane[d]);
+    normalsArray.push(normal);
     texCoordArray.push(vec3(0, 0, 2.0));
   }
 }
