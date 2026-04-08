@@ -129,15 +129,17 @@ function vase(height, radius, segments) {
   var indices = [];
 
   // Create vertices and normals for the vase
+  // 将Y从[0, height]转换为[-height/2, height/2]，使花瓶以原点为中心
   for (var i = 0; i <= segments; i++) {
     var theta = (i / segments) * 2 * Math.PI;
     for (var j = 0; j <= segments; j++) {
-      var y = (j / segments) * height;
-      var r = radius * (1 - y / height);
+      var y_normalized = (j / segments) * height - height / 2;  // 偏移使其以0为中心
+      var y_ratio = (j / segments);  // 用于半径计算
+      var r = radius * (1 - y_ratio);
       var x = r * Math.cos(theta);
       var z = r * Math.sin(theta);
-      vertices.push(vec3(x, y, z));
-      normals.push(normalize(vec3(x, radius - y, z)));
+      vertices.push(vec3(x, y_normalized, z));
+      normals.push(normalize(vec3(x, radius - y_ratio * height, z)));
     }
   }
 
@@ -156,6 +158,7 @@ function vase(height, radius, segments) {
   for (var i = 0; i < vertices.length; i++) {
     pointsArray.push(vertices[i]);
     normalsArray.push(normals[i]);
+    texCoordArray.push(vec3(0.5, 0.5, 0.0));
   }
 
   // Add the indices to the global array
@@ -373,9 +376,7 @@ function quad(a, b, c, d, is_up) {
 function sphere(radius, longitudeSteps, latitudeSteps) {
   let phiSteps = latitudeSteps;
   let thetaSteps = longitudeSteps;
-  let vertices = [];
-  let normals = [];
-  let indices = [];
+  
   for (let i = 0; i <= phiSteps; i++) {
     let phi = (Math.PI * i) / phiSteps;
     let sinPhi = Math.sin(phi);
@@ -390,8 +391,9 @@ function sphere(radius, longitudeSteps, latitudeSteps) {
       let y = radius * sinPhi * sinTheta;
       let z = radius * cosPhi;
 
-      vertices.push(vec3(x, y, z));
-      normals.push(vec3(x / radius, y / radius, z / radius));
+      pointsArray.push(vec3(x, y, z));
+      normalsArray.push(vec3(x / radius, y / radius, z / radius));
+      texCoordArray.push(vec3(0.5, 0.5, 0.0));
     }
   }
 
@@ -400,14 +402,8 @@ function sphere(radius, longitudeSteps, latitudeSteps) {
       let p1 = i * (thetaSteps + 1) + j;
       let p2 = p1 + thetaSteps + 1;
 
-      indices.push(p1, p2, p1 + 1);
-      indices.push(p1 + 1, p2, p2 + 1);
+      indicesArray.push(p1, p2, p1 + 1);
+      indicesArray.push(p1 + 1, p2, p2 + 1);
     }
   }
-
-  return {
-    vertices: vertices,
-    normals: normals,
-    indices: indices,
-  };
 }

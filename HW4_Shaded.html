@@ -143,33 +143,40 @@ void main()
 			vec3 unitL = normalize(L);
 			vec3 unitE = normalize(E);
 			
-			// halfway vector (instead of reflection vector)
+			// halfway vector (for specular highlight)
 			vec3 H = normalize(unitL + unitE);
 			vec4 finalColor;
+			float LNdotProduct = dot(unitL, unitN);
 			
+			// ============================================
+			// Phong Shading Model (shadingModel == 1)
+			// Final = ambient + (Kd * diffuse * max(L·N, 0)) + (Ks * specular * (H·N)^shininess)
+			// ============================================
 			if (shadingModel == 1) {
-				float LNdotProduct = dot(unitL, unitN);
 				float Kd = max(LNdotProduct, 0.0);
 				float Ks = pow(max(dot(H, unitN), 0.0), shininess);
-				finalColor = ambientProduct + Kd * diffuseProduct * max(LNdotProduct, 0.0) + Ks * specularProduct;
-			} else {
+				// Phong: Specular based on Halfway vector method
+				finalColor = ambientProduct + (Kd * diffuseProduct) + (Ks * specularProduct);
+			} 
+			// ============================================
+			// Blinn-Phong Shading Model (shadingModel == 0)
+			// Final = ambient + (Kd * diffuse * max(L·N, 0)) + (Ks * specular * max(N·H, 0)^shininess)
+			// ============================================
+			else {
 				vec4 ambient = ambientProduct;
-				// diffuse attenuation (Lambert's law)
-				float LNdotProduct = dot(unitL, unitN);
+				// Diffuse: Lambert's Cosine Law
 				float Kd = max(LNdotProduct, 0.0);
 				vec4 diffuse = Kd * diffuseProduct;
-			
-				// specular attenuation
+				
+				// Specular: Blinn-Phong using Normal·Halfway
 				float Ks = pow(max(dot(unitN, H), 0.0), shininess);
 				vec4 specular = Ks * specularProduct;
-			
-				// turn off specular if there is no diffuse
+				
+				// Turn off specular if surface is back-lit
 				if (LNdotProduct < 0.0) {
 					specular = vec4(0.0, 0.0, 0.0, 1.0);
 				}
-			
-				// create working color 
-				// so we can play before loading into fColor
+				
 				finalColor = ambient + diffuse + specular;
 			}
 			
@@ -220,52 +227,70 @@ void main()
 		Oops ... your browser doesn't support the HTML5 canvas element
 	</canvas>
 
-	<h1>Homework 4: Texture It ！</h1>
+	<h1>WebGL Material & Shading Demonstration</h1>
 	<div>
-		<p> Create a webGL program that applies a normal map to a parametric surface and a texture 
-			map to a ground plane surface (box) on which the surface sits.
+		<p><strong>Teaching Project:</strong> Interactive demonstration of different shading models (Phong vs Blinn-Phong) 
+			and how materials interact with light to create different visual appearances.
 		</p>
-
-		<div>
-
+		<p style="color:#666; font-size:0.9em;">
+			<strong>Learning Objectives:</strong><br>
+			• Understand how <strong>Phong shading</strong> (spec: H·N) vs <strong>Blinn-Phong shading</strong> (spec: N·H) differ<br>
+			• Observe how <strong>material properties</strong> (ambient, diffuse, specular, shininess) affect appearance<br>
+			• See how <strong>light position</strong> changes lighting conditions<br>
+			• Compare different <strong>geometric primitives</strong> (Torus, Vase, Sphere)
+		</p>
+	</div>
 			<div>
-				<strong>Change the parametric surface: </strong>
+				<strong>📦 Select Geometry: </strong>
 				<button id="surface1">Torus</button>
 				<button id="surface2">Vase</button>
 				<button id="surface3">Sphere</button><br>
 			</div>
 
 			<div>
-				<strong>Change the light position: </strong>
-				<button id="lightPositionButton1"> one at the eye </button>
-				<button id="lightPositionButton2"> one is another </button><br>
+				<strong>💡 Light Source Position: </strong>
+				<button id="lightPositionButton1">Position A (3,4,4)</button>
+				<button id="lightPositionButton2">Position B (Eye)</button><br>
+				<small id="lightLocation"></small>
 			</div>
+
 			<div>
-				<br>
-				<strong>Light location: </strong><span id="lightLocation"></span>
-				<br>
+				<strong>🎨 Materials with Shading Models: </strong><br>
+				<fieldset style="display:inline-block; padding:10px; border:1px solid #2196F3; min-width:240px;">
+					<legend style="color:#2196F3;"><strong>Phong Shading</strong> (Specular: H·N)</legend>
+					<button id="material1" style="width:100%; margin:5px 0;">Polished Gold</button>
+					<button id="lightColor1" style="width:100%; margin:5px 0;">Brushed Steel</button>
+					<small style="color:#666;">Sharp, mirror-like highlights</small>
+				</fieldset>
+				<fieldset style="display:inline-block; padding:10px; border:1px solid #FF9800; min-width:240px; margin-left:10px;">
+					<legend style="color:#FF9800;"><strong>Blinn-Phong Shading</strong> (Specular: N·H)</legend>
+					<button id="material2" style="width:100%; margin:5px 0;">Matte Red</button>
+					<button id="lightColor2" style="width:100%; margin:5px 0;">Ceramic</button>
+					<small style="color:#666;">Soft, diffuse highlights</small>
+				</fieldset><br>
+				<div style="font-size:0.85em; color:#666; margin-top:10px;">
+					<strong>Material Characteristics:</strong><br>
+					• Polished Gold: High reflectivity, sharp specular<br>
+					• Brushed Steel: Medium reflectivity, industrial finish<br>
+					• Matte Red: Low reflectivity, rough surface<br>
+					• Ceramic: Smooth but dull finish
+				</div>
 			</div>
+
 			<div>
-				<strong>Change the material: </strong>
-				<button id="material1">Phong with golden-yellow</button>
-				<button id="material2">Gouraud with golden-yellow</button><br>
-			</div>
-			<div>
-				<strong>Change the light color: </strong>
-				<button id="lightColor1">gold-yellow with Phong</button>
-				<button id="lightColor2">red with Phong</button><br>
-			</div>
-			<div>
-				<strong> Change the view: </strong>
+				<strong>🔍 Projection: </strong>
 				<button id="OrthographicButton">Orthographic</button>
-				<button id="perspectiveButton">perspective projection</button><br>
+				<button id="perspectiveButton">Perspective</button><br>
 			</div>
-			<div>
-				<strong>Optional</strong><br>
-				<button id="animation">Start Animation</button>
-				Animate the object.Play the drop music when the object is falling<br>
-				<audio id="myaudio" src="../HW4/bass-drop.mp3" controls="controls" autoplay loop="true" hidden="true"></audio>
-				</audio>
+			<div style="margin-top:20px; padding:10px; background:#f5f5f5; border-left:4px solid #2196F3;">
+				<strong>🎬 Physics Animation: </strong><br>
+				<button id="animation" style="background:#2196F3; color:white; padding:8px 16px; border:none; cursor:pointer; border-radius:4px;">Start Animation</button>
+				<small style="display:block; margin-top:5px; color:#666;">
+					Drop the object and see it bounce with realistic physics. 
+					Observe how different geometries (Torus vs Vase vs Sphere) interact with the platform.
+					Musical accompaniment plays during the drop!
+				</small>
+				<audio id="myaudio" src="bass-drop.mp3" preload="auto" style="display:none;"></audio>
 			</div>
 
 </body>

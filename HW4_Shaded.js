@@ -65,10 +65,9 @@ var plane = [
   vec3(1.0, -1.0, -1.0),
 ];
 
-// light position is defined in eye coordinates
-// var lightPosition = vec4(3.0, 3.0, 5, 1.0 );
-// var lightPosition = vec4(0.0, 0.0, 0.0, 1.0 );
-var lightPosition = vec4(10.0, 0.0, 0.0, 1.0);
+// Light position in eye coordinates
+// Position: (3, 4, 4) provides good 3D depth and balanced lighting
+var lightPosition = vec4(3.0, 4.0, 4.0, 1.0);
 
 var lightAmbient = vec4(0.2, 0.2, 0.2, 1.0);
 var lightDiffuse = vec4(1.0, 1.0, 1.0, 1.0);
@@ -95,10 +94,10 @@ var viewDirectionProjectionInverseMatrix;
 var u_Sampler;
 
 var l = 2.0;
-var h = 0.1;
+var h = 0.15;  // Platform thickness - adjusted for better alignment
 var w = 2.0;
 var transX = 0;
-var transY = -1;
+var transY = -0.8;  // Platform center Y - adjusted so top surface at y = transY + h ≈ -0.65
 var transZ = 0;
 var mat_cube = mat4(
   l,
@@ -120,14 +119,15 @@ var mat_cube = mat4(
 );
 
 //animation variables
+// Initial drop position - models will fall from y=1.5 to platform at y≈-0.65
 var vec3_velocity = vec3(0.0, 0, 0.0);
-var vec3_location = vec3(0.0, 2.0, 0.0);
-var f_delta_time = 0.01;
-var f_gravirty = vec3(0.0, -4.9, 0.0);
-var f_bounce = 0.8;
-var b_bounced = false;
-var i_count = 0;
-var f_object_h = 0.65;
+var vec3_location = vec3(0.0, 1.5, 0.0);  // Drop start height
+var f_delta_time = 0.016;  // Physics time step
+var f_gravirty = vec3(0.0, -9.8, 0.0);  // Standard gravity
+var f_bounce = 0.8;  // Energy loss on bounce (0.8 = 80% retained)
+var b_bounced = false;  // Tracks if bounce occurred this frame
+var i_count = 0;  // Counter for settling detection (15 frames = settled)
+var f_object_h = 0.65;  // Default: distance from center to bottom (updated per model)
 var b_play = false;
 var time = 0.0;
 // ==================== run program
@@ -173,14 +173,18 @@ window.onload = function init() {
   // load the skybox
   initSkybox();
 
-  // report light location
-  document.getElementById("lightLocation").innerHTML =
-    "Light location (in eye coordinates) = " +
-    lightPosition[0].toFixed(2) +
-    ", " +
-    lightPosition[1].toFixed(2) +
-    ", " +
-    lightPosition[2].toFixed(2);
+  // Initial light location display
+  updateLightLocationDisplay = function() {
+    document.getElementById("lightLocation").innerHTML =
+      "Light = (" +
+      lightPosition[0].toFixed(2) +
+      ", " +
+      lightPosition[1].toFixed(2) +
+      ", " +
+      lightPosition[2].toFixed(2) +
+      ")";
+  };
+  updateLightLocationDisplay();
 
   // load the texture buffer
   var texCoord_Buffer = gl.createBuffer();
@@ -230,134 +234,106 @@ window.onload = function init() {
   // define mouse event listeners
   mouseControls();
 
-  // light position interaction
+  // ============================================
+  // Light Position Control
+  // ============================================
   document.getElementById("lightPositionButton1").onclick = function () {
-    lightPosition = vec4(10.0, 0.0, 0.0, 1.0);
+    // Position A: 45-degree angle for balanced 3D lighting
+    lightPosition = vec4(3.0, 4.0, 4.0, 1.0);
     gl.uniform4fv(
       gl.getUniformLocation(program, "lightPosition"),
       flatten(lightPosition)
     );
-    // report light location
-    document.getElementById("lightLocation").innerHTML =
-      "Light location (in eye coordinates) = " +
-      lightPosition[0].toFixed(2) +
-      ", " +
-      lightPosition[1].toFixed(2) +
-      ", " +
-      lightPosition[2].toFixed(2);
+    updateLightLocationDisplay();
   };
+  
   document.getElementById("lightPositionButton2").onclick = function () {
+    // Position B: At camera (eye-space lighting)
     lightPosition = vec4(viewer.eye[0], viewer.eye[1], viewer.eye[2], 1.0);
-    console.log(lightPosition);
     gl.uniform4fv(
       gl.getUniformLocation(program, "lightPosition"),
       flatten(lightPosition)
     );
-    // report light location
+    updateLightLocationDisplay();
+  };
+  
+  // Helper function to update light display
+  function updateLightLocationDisplay() {
     document.getElementById("lightLocation").innerHTML =
-      "Light location  = " +
+      "Light = (" +
       lightPosition[0].toFixed(2) +
       ", " +
       lightPosition[1].toFixed(2) +
       ", " +
-      lightPosition[2].toFixed(2);
-  };
+      lightPosition[2].toFixed(2) +
+      ")";
+  }
 
   // light material interaction
   // Shading shading
+  // ============================================
+  // Material 1: Polished Gold (Phong Shading)
+  // High specular for mirror-like reflections
+  // ============================================
   document.getElementById("material1").onclick = function () {
-    materialAmbient = vec4(1.0, 0.0, 1.0, 1.0);
-    materialDiffuse = vec4(1.0, 0.8, 0.0, 1.0);
-    materialSpecular = vec4(1.0, 0.8, 0.0, 1.0);
-    materialShininess = 100.0;
-    ambientProduct = mult(lightAmbient, materialAmbient);
-    diffuseProduct = mult(lightDiffuse, materialDiffuse);
-    specularProduct = mult(lightSpecular, materialSpecular);
-    gl.uniform4fv(
-      gl.getUniformLocation(program, "ambientProduct"),
-      flatten(ambientProduct)
-    );
-    gl.uniform4fv(
-      gl.getUniformLocation(program, "diffuseProduct"),
-      flatten(diffuseProduct)
-    );
-    gl.uniform4fv(
-      gl.getUniformLocation(program, "specularProduct"),
-      flatten(specularProduct)
-    );
-    gl.uniform1f(
-      gl.getUniformLocation(program, "shininess"),
-      materialShininess
-    );
-    // gl.uniform1i(gl.getUniformLocation(program, "shadingModel"), 0);
+    // Polished gold material - highly reflective
+    materialAmbient = vec4(0.3, 0.3, 0.0, 1.0);     // Dark ambient base
+    materialDiffuse = vec4(1.0, 0.8, 0.0, 1.0);     // Gold diffuse
+    materialSpecular = vec4(1.0, 1.0, 0.8, 1.0);    // Bright specular (glossy)
+    materialShininess = 128.0;                      // Very sharp highlights
+    
+    updateMaterialAndShading(1);  // Phong shading
   };
-  // Gouraud shading
+  
+  // ============================================
+  // Material 2: Matte Red (Blinn-Phong Shading)
+  // Lower specular for diffuse appearance
+  // ============================================
   document.getElementById("material2").onclick = function () {
-    materialAmbient = vec4(1.0, 0.0, 1.0, 1.0);
-    materialDiffuse = vec4(1.0, 0.8, 0.0, 1.0);
-    materialSpecular = vec4(1.0, 0.8, 0.0, 1.0);
-    materialShininess = 100.0;
-
-    ambientProduct = mult(lightAmbient, materialAmbient);
-    diffuseProduct = mult(lightDiffuse, materialDiffuse);
-    specularProduct = mult(lightSpecular, materialSpecular);
-    gl.uniform4fv(
-      gl.getUniformLocation(program, "ambientProduct"),
-      flatten(ambientProduct)
-    );
-    gl.uniform4fv(
-      gl.getUniformLocation(program, "diffuseProduct"),
-      flatten(diffuseProduct)
-    );
-    gl.uniform4fv(
-      gl.getUniformLocation(program, "specularProduct"),
-      flatten(specularProduct)
-    );
-    gl.uniform1f(
-      gl.getUniformLocation(program, "shininess"),
-      materialShininess
-    );
-    // gl.uniform1i(gl.getUniformLocation(program, "shadingModel"), 1);
+    // Matte red material - rough surface
+    materialAmbient = vec4(0.3, 0.0, 0.0, 1.0);     // Dark red ambient
+    materialDiffuse = vec4(0.8, 0.1, 0.1, 1.0);     // Deep red diffuse
+    materialSpecular = vec4(0.4, 0.3, 0.3, 1.0);    // Dull specular (matte)
+    materialShininess = 16.0;                       // Broad, soft highlights
+    
+    updateMaterialAndShading(0);  // Blinn-Phong shading
   };
 
-  // gold-yellow material
+  // ============================================
+  // Material 3: Brushed Steel (Phong Shading)
+  // Medium specular for industrial look
+  // ============================================
   document.getElementById("lightColor1").onclick = function () {
-    materialAmbient = vec4(1.0, 0.0, 1.0, 1.0);
-    materialDiffuse = vec4(1.0, 0.8, 0.0, 1.0);
-    materialSpecular = vec4(1.0, 0.8, 0.0, 1.0);
-    materialShininess = 100.0;
-    ambientProduct = mult(lightAmbient, materialAmbient);
-    diffuseProduct = mult(lightDiffuse, materialDiffuse);
-    specularProduct = mult(lightSpecular, materialSpecular);
-    gl.uniform4fv(
-      gl.getUniformLocation(program, "ambientProduct"),
-      flatten(ambientProduct)
-    );
-    gl.uniform4fv(
-      gl.getUniformLocation(program, "diffuseProduct"),
-      flatten(diffuseProduct)
-    );
-    gl.uniform4fv(
-      gl.getUniformLocation(program, "specularProduct"),
-      flatten(specularProduct)
-    );
-    gl.uniform1f(
-      gl.getUniformLocation(program, "shininess"),
-      materialShininess
-    );
-    gl.uniform1i(gl.getUniformLocation(program, "shadingModel"), 0);
+    // Brushed steel material
+    materialAmbient = vec4(0.3, 0.3, 0.35, 1.0);    // Gray-blue ambient
+    materialDiffuse = vec4(0.7, 0.7, 0.75, 1.0);    // Light gray diffuse
+    materialSpecular = vec4(0.8, 0.8, 0.9, 1.0);    // Bright silver specular
+    materialShininess = 64.0;                       // Medium-sharp highlights
+    
+    updateMaterialAndShading(1);  // Phong shading
   };
 
-  //  red material; try changing light color
+  // ============================================
+  // Material 4: Ceramic/Plastic (Blinn-Phong Shading)
+  // Smooth but non-metallic surface
+  // ============================================
   document.getElementById("lightColor2").onclick = function () {
-    var materialAmbient = vec4(1.0, 0.0, 0.0, 1.0);
-    var materialDiffuse = vec4(0.3, 0.0, 0.0, 1.0);
-    var materialSpecular = vec4(1.0, 0.0, 0.0, 1.0);
-    var materialShininess = 10.0;
-
+    // Ceramic/plastic material - smooth matte
+    materialAmbient = vec4(0.2, 0.2, 0.2, 1.0);    // Dark ambient
+    materialDiffuse = vec4(0.7, 0.5, 0.2, 1.0);    // Warm brown diffuse
+    materialSpecular = vec4(0.5, 0.5, 0.5, 1.0);   // Medium specular (plastic-like)
+    materialShininess = 32.0;                      // Medium highlights
+    
+    updateMaterialAndShading(0);  // Blinn-Phong shading
+  };
+  // ============================================
+  // Helper Function: Update Material & Shading Model
+  // ============================================
+  function updateMaterialAndShading(shadingModel) {
     ambientProduct = mult(lightAmbient, materialAmbient);
     diffuseProduct = mult(lightDiffuse, materialDiffuse);
     specularProduct = mult(lightSpecular, materialSpecular);
+    
     gl.uniform4fv(
       gl.getUniformLocation(program, "ambientProduct"),
       flatten(ambientProduct)
@@ -374,8 +350,10 @@ window.onload = function init() {
       gl.getUniformLocation(program, "shininess"),
       materialShininess
     );
-    gl.uniform1i(gl.getUniformLocation(program, "shadingModel"), 0);
-  };
+    // Enable shading model switch: 1 = Phong, 0 = Blinn-Phong
+    gl.uniform1i(gl.getUniformLocation(program, "shadingModel"), shadingModel);
+  }
+
   // viewer projection interaction
   document.getElementById("OrthographicButton").onclick = function () {
     projectionMatrix = ortho(left, right, bottom, ytop, near, far);
@@ -392,16 +370,21 @@ window.onload = function init() {
     gl.uniformMatrix4fv(projectionMatrixAxis, false, flatten(projectionMatrix));
   };
 
-  // change model-view matrix
+  // Model 1: Torus (R=0.4, r=0.3)
+  // Range: Y from -(R+r) to +(R+r) = -0.7 to +0.7, centered at origin
   document.getElementById("surface1").onclick = function () {
+    // Reset animation state when switching models
+    b_play = false;
+    vec3_velocity = vec3(0.0, 0, 0.0);
+    vec3_location = vec3(0.0, 1.5, 0.0);
+    
     indicesArray = [];
     pointsArray = [];
     normalsArray = [];
     texCoordArray = [];
     torus(0.4, 0.3, 180, 180);
-    // load the skybox
     initSkybox();
-    //animate
+    // Torus: full radius from center to edge ~ 0.65
     f_object_h = 0.65;
 
     // load the texture buffer
@@ -432,18 +415,22 @@ window.onload = function init() {
     gl.enableVertexAttribArray(vPosition);
   };
 
+  // Model 2: Vase (height=0.5, radius=0.5)
+  // NOW centered at origin after geometry fix: Y from -0.25 to +0.25
   document.getElementById("surface2").onclick = function () {
+    // Reset animation state when switching models
+    b_play = false;
+    vec3_velocity = vec3(0.0, 0, 0.0);
+    vec3_location = vec3(0.0, 1.5, 0.0);
+    
     indicesArray = [];
     pointsArray = [];
     normalsArray = [];
     texCoordArray = [];
-
     vase(0.5, 0.5, 120);
-    // load the skybox
     initSkybox();
-    //animate
-    //paremters for the animation
-    f_object_h = 0.5;
+    // Vase: height 0.5, centered, so half-height = 0.25 from center to bottom
+    f_object_h = 0.25;
 
     // load the texture buffer
     var texCoord_Buffer = gl.createBuffer();
@@ -515,55 +502,23 @@ window.onload = function init() {
   //   gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
   //   gl.enableVertexAttribArray(vPosition);
   // };
+  // Model 3: Sphere (radius=1)
+  // Range: Y from -1 to +1, centered at origin
   document.getElementById("surface3").onclick = function () {
-    // indicesArray = [];
-    // pointsArray = [];
-    // normalsArray = [];
-    // texCoordArray = [];
-    // sphere(0.5, 180, 180);
-    // // load the skybox
-    // initSkybox();
-    // //animate
-    // //paremters for the animation
-    // f_object_h = 0.5;
-    // gl.bindBuffer( gl.ARRAY_BUFFER, nBuffer);
-    // gl.bufferData( gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW );
-    // gl.vertexAttribPointer( vNormal, 3, gl.FLOAT, false, 0, 0 );
-    // gl.enableVertexAttribArray( vNormal);
-
-
-    // // texCoord begin
-    // gl.bindBuffer( gl.ARRAY_BUFFER, texCoord_Buffer);
-    // gl.bufferData( gl.ARRAY_BUFFER, flatten(texCoordArray), gl.STATIC_DRAW );
-    // gl.vertexAttribPointer( texCoord_location, 3, gl.FLOAT, false, 0, 0 );
-    // gl.enableVertexAttribArray( texCoord_location);
-    // // texCoord end
-
-
-    // gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    // gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
-
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    // gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indicesArray), gl.STATIC_DRAW);
-
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    // Reset animation state when switching models
+    b_play = false;
+    vec3_velocity = vec3(0.0, 0, 0.0);
+    vec3_location = vec3(0.0, 1.5, 0.0);
     
-    // gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-    // gl.enableVertexAttribArray(vPosition);
-      //animation
-      f_object_h = 0.3;
-
-      indicesArray = [];
-      pointsArray = [];
-      normalsArray = [];
-      texCoordArray = [];
-      sphere(1, 180, 180);
-      // sphere(0.3,32,32);
-      // for(var i = 0; i < plane.length; i++){
-      //     pointsArray.push(plane[i]);
-      // }
+    indicesArray = [];
+    pointsArray = [];
+    normalsArray = [];
+    texCoordArray = [];
+    sphere(1, 180, 180);
+    // Sphere: radius 1, centered, distance from center to bottom = 1.0
+    f_object_h = 1.0;
   
-      initSkybox();
+    initSkybox();
       gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
       gl.bufferData(gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW);
       gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
@@ -590,46 +545,18 @@ window.onload = function init() {
   
       gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(vPosition);
-    // // load the texture buffer
-    // var texCoord_Buffer = gl.createBuffer();
-    // gl.bindBuffer(gl.ARRAY_BUFFER, texCoord_Buffer);
-    // gl.bufferData(gl.ARRAY_BUFFER, flatten(texCoordArray), gl.STATIC_DRAW);
-    // var texCoord_location = gl.getAttribLocation(program, "a_TexCoord");
-    // gl.vertexAttribPointer(texCoord_location, 3, gl.FLOAT, false, 0, 0);
-    // gl.enableVertexAttribArray(texCoord_location);
-    // // general buffer
-
-    // gl.bindBuffer(gl.ARRAY_BUFFER, nBuffer);
-    // gl.bufferData(gl.ARRAY_BUFFER, flatten(normalsArray), gl.STATIC_DRAW);
-    // gl.vertexAttribPointer(vNormal, 3, gl.FLOAT, false, 0, 0);
-    // gl.enableVertexAttribArray(vNormal);
-
-    // gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    // gl.bufferData(gl.ARRAY_BUFFER, flatten(pointsArray), gl.STATIC_DRAW);
-
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-    // gl.bufferData(
-    //   gl.ELEMENT_ARRAY_BUFFER,
-    //   new Uint16Array(indicesArray),
-    //   gl.STATIC_DRAW
-    // );
-
-    // gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-
-    // gl.vertexAttribPointer(vPosition, 3, gl.FLOAT, false, 0, 0);
-    // gl.enableVertexAttribArray(vPosition);
-
-    // // Draw the sphere
-    // gl.drawElements(
-    //     gl.TRIANGLES, indicesArray.length, gl.UNSIGNED_SHORT, 0
-    // );
-    // gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
   };
   //animation
   document.getElementById("animation").onclick = function () {
     b_play = true;
     vec3_velocity = vec3(0.0, 0, 0.0);
-    vec3_location = vec3(0.0, 2.0, 0.0);
+    vec3_location = vec3(0.0, 1.5, 0.0);  // Reset to initial drop position
+    // Start audio playback
+    var myAudio = document.getElementById("myaudio");
+    myAudio.currentTime = 0;
+    myAudio.play().catch(function(error) {
+      console.log("Audio play failed:", error);
+    });
   };
 
   gl.uniform4fv(
@@ -759,7 +686,6 @@ function initTexture(program) {
 }
 function animation() {
   if (b_play) {
-    var myAuto = document.getElementById("myaudio");
     if (
       -0.05 < vec3_velocity[1] &&
       vec3_velocity[1] < 0.05 &&
@@ -771,9 +697,10 @@ function animation() {
     }
     if (i_count >= 15) {
       b_play = false;
-      myAuto.pause();
-    } else {
-      myAuto.play();
+      // Stop audio when animation ends
+      var myAudio = document.getElementById("myaudio");
+      myAudio.pause();
+      myAudio.currentTime = 0;
     }
 
     if (vec3_location[1] - f_object_h <= transY + h) {
