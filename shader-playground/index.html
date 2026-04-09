@@ -21,141 +21,172 @@
 			overflow: hidden;
 		}
 
-		/* Header */
+		/* ===== HERO HEADER ===== */
 		header {
-			padding: 20px 30px;
-			border-bottom: 1px solid #e0e0e0;
-			background: #fafafa;
+			padding: 24px 32px;
+			border-bottom: 1px solid #e5e5e5;
+			background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
 		}
 
 		h1 {
-			font-size: 24px;
+			font-size: 28px;
 			font-weight: 300;
-			letter-spacing: 0.5px;
-			margin-bottom: 4px;
+			letter-spacing: -0.5px;
+			margin-bottom: 6px;
+			color: #222;
 		}
 
 		.subtitle {
 			font-size: 13px;
 			color: #888;
 			font-weight: 300;
+			letter-spacing: 0.3px;
 		}
 
-		/* Main Container */
+		/* ===== MAIN CONTAINER ===== */
 		.main-container {
 			display: grid;
-			grid-template-columns: 1fr 280px;
-			gap: 20px;
-			flex: 1;
-			padding: 20px;
+		grid-template-columns: 1fr 340px;
 			overflow: hidden;
 		}
 
-		/* Canvas Area */
-		.canvas-container {
-			background: #f5f5f5;
-			border: 1px solid #ddd;
-			border-radius: 2px;
+		/* ===== CANVAS & COMPARE MODE ===== */
+		.canvas-wrapper {
+			display: flex;
+			flex-direction: column;
+			gap: 6px;
+
+			border: 1px solid #e0e0e0;
+			border-radius: 3px;
 			display: flex;
 			align-items: center;
 			justify-content: center;
 			position: relative;
 			overflow: hidden;
+			flex: 1;
+			min-height: 400px;
 		}
 
-		#gl-canvas {
+		.canvas-split {
+			display: grid !important;
+			grid-template-columns: 1fr 1fr;
+			gap: 8px;
+			flex: 1;
+		}
+
+		.canvas-split .canvas-container {
+			min-height: 300px;
+		}
+
+		#gl-canvas, #gl-canvas-compare {
 			display: block;
 			width: 100%;
 			height: 100%;
 		}
 
-		/* Control Panel - Right Sidebar */
-		.control-sidebar {
+		.canvas-label {
+			position: absolute;
+			top: 8px;
+			left: 8px;
+			font-size: 11px;
+			background: rgba(255,255,255,0.9);
+			padding: 4px 8px;
+			border-radius: 2px;
+			font-weight: 600;
+			color: #666;
+			z-index: 10;
+		}
+
+		/* ===== CONTROL PANEL - RIGHT SIDEBAR ===== */
+		.control-panel {
 			display: flex;
 			flex-direction: column;
-			gap: 16px;
+			gap: 6px;
 			overflow-y: auto;
-			padding-right: 4px;
-		}
-
-		.control-group {
-			background: #f9f9f9;
-			border: 1px solid #e0e0e0;
+		width: 340px;
+			background: #fbfbfb;
+			border: 1px solid #f0f0f0;
 			border-radius: 2px;
-			padding: 14px;
+			padding: 8px 6px;
+			flex-shrink: 0;
 		}
 
-		.control-group-title {
-			font-size: 11px;
-			text-transform: uppercase;
-			letter-spacing: 1px;
-			color: #666;
-			font-weight: 600;
-			margin-bottom: 10px;
+		.section-title {
+		font-size: 9px;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		color: #888;
+		font-weight: 700;
+		margin-bottom: 5px;
+		}
+
+		.control-row {
+			margin-bottom: 3px;
+		}
+
+		.control-row:last-child {
+			margin-bottom: 0;
+		}
+
+		.control-label {
+		font-size: 9px;
+		color: #666;
 			display: block;
+			margin-bottom: 2px;
 		}
 
-		.button-row {
+		.button-group {
 			display: grid;
 			grid-template-columns: 1fr 1fr;
-			gap: 6px;
-			margin-bottom: 6px;
+			gap: 3px;
 		}
 
-		.button-row.full {
+		.button-group.full {
 			grid-template-columns: 1fr;
 		}
 
+		.button-group.triple {
+			grid-template-columns: 1fr 1fr 1fr;
+		}
+
 		button {
-			padding: 8px 10px;
-			background: #fff;
-			border: 1px solid #ddd;
+			padding: 6px 8px;
+			background: #f5f5f5;
+			border: 1px solid #ccc;
 			border-radius: 2px;
 			color: #333;
-			font-size: 12px;
+			font-size: 10px;
 			font-weight: 500;
 			cursor: pointer;
-			transition: all 0.2s ease;
+			transition: all 0.15s ease;
 		}
 
 		button:hover {
-			background: #f0f0f0;
+			background: #e8e8e8;
 			border-color: #999;
 		}
 
 		button.active {
-			background: #333;
+			background: #222;
 			color: #fff;
-			border-color: #333;
+			border-color: #222;
 		}
 
-		.preset-button {
-			padding: 6px 8px;
-			font-size: 11px;
-			margin-bottom: 4px;
-		}
-
-		.preset-button:last-child {
-			margin-bottom: 0;
+		.small-button {
+			padding: 5px 7px;
+			font-size: 9px;
 		}
 
 		/* Sliders */
 		.slider-container {
-			margin-top: 8px;
-		}
-
-		.slider-label {
 			display: flex;
-			justify-content: space-between;
-			align-items: center;
-			font-size: 11px;
-			color: #666;
-			margin-bottom: 6px;
+			flex-direction: column;
+			gap: 4px;
 		}
 
 		input[type="range"] {
 			width: 100%;
-			height: 4px;
+			height: 3px;
 			border-radius: 2px;
 			background: #ddd;
 			outline: none;
@@ -166,112 +197,167 @@
 		input[type="range"]::-webkit-slider-thumb {
 			-webkit-appearance: none;
 			appearance: none;
-			width: 12px;
-			height: 12px;
+			width: 11px;
+			height: 11px;
 			border-radius: 50%;
-			background: #333;
+			background: #222;
 			cursor: pointer;
 		}
 
 		input[type="range"]::-moz-range-thumb {
-			width: 12px;
-			height: 12px;
+			width: 11px;
+			height: 11px;
 			border-radius: 50%;
-			background: #333;
+			background: #222;
 			cursor: pointer;
 			border: none;
 		}
 
-		/* Info Text */
-		.info-text {
-			font-size: 11px;
-			color: #999;
-			margin-top: 6px;
-			line-height: 1.4;
-		}
-
-		/* Bottom Control Bar */
-		.control-bar {
-			display: grid;
-			grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-			gap: 12px;
-			padding: 16px 20px;
-			border-top: 1px solid #e0e0e0;
-			background: #fafafa;
-			max-height: 120px;
-			overflow-y: auto;
-		}
-
-		.control-item {
+		.slider-label {
 			display: flex;
-			flex-direction: column;
-			gap: 6px;
+			justify-content: space-between;
+			font-size: 10px;
+			color: #999;
 		}
 
-		.control-label {
-			font-size: 10px;
-			text-transform: uppercase;
-			letter-spacing: 1px;
+		/* Slider hover feedback */
+		.slider-container:hover input[type="range"] {
+			background: #bbb;
+		}
+
+		.slider-container:hover .slider-label {
 			color: #666;
 			font-weight: 600;
 		}
 
-		.control-buttons {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
+		input[type="range"]::-webkit-slider-thumb:hover {
+			-webkit-appearance: none;
+			width: 14px;
+			height: 14px;
+			box-shadow: 0 0 8px rgba(0,0,0,0.3);
+		}
+
+		input[type="range"]::-moz-range-thumb:hover {
+			width: 14px;
+			height: 14px;
+			box-shadow: 0 0 8px rgba(0,0,0,0.3);
+		}
+
+		/* URL share button */
+		.share-controls {
+			display: flex;
 			gap: 6px;
+			margin-top: 8px;
 		}
 
-		.control-buttons.single {
-			grid-template-columns: 1fr;
-		}
-
-		.control-buttons button {
+		.share-btn {
+			flex: 1;
 			padding: 6px 8px;
-			font-size: 11px;
+			background: #f0f0f0;
+			border: 1px solid #d0d0d0;
+			border-radius: 2px;
+			font-size: 9px;
+			font-weight: 600;
+			color: #555;
+			cursor: pointer;
+			transition: all 0.15s ease;
+		}
+
+		.share-btn:hover {
+			background: #e0e0e0;
+			border-color: #999;
+		}
+
+		.share-btn.active {
+			background: #222;
+			color: #fff;
+			border-color: #222;
 		}
 
 		/* Scrollbar */
-		.control-sidebar::-webkit-scrollbar,
-		.control-bar::-webkit-scrollbar {
-			width: 6px;
+		.control-panel::-webkit-scrollbar {
+			width: 5px;
 		}
 
-		.control-sidebar::-webkit-scrollbar-track,
-		.control-bar::-webkit-scrollbar-track {
+		.control-panel::-webkit-scrollbar-track {
 			background: transparent;
 		}
 
-		.control-sidebar::-webkit-scrollbar-thumb,
-		.control-bar::-webkit-scrollbar-thumb {
+		.control-panel::-webkit-scrollbar-thumb {
 			background: #ccc;
 			border-radius: 3px;
 		}
 
-		.control-sidebar::-webkit-scrollbar-thumb:hover,
-		.control-bar::-webkit-scrollbar-thumb:hover {
+		.control-panel::-webkit-scrollbar-thumb:hover {
 			background: #999;
 		}
 
-		/* Responsive */
-		@media (max-width: 1024px) {
+		/* Shader info + share section */
+		.preset-info {
+			font-size: 9px;
+			color: #666;
+			margin-top: 2px;
+			margin-bottom: 4px;
+			line-height: 1.4;
+		}
+
+		/* ===== TECHNICAL NOTES SECTION ===== */
+		.tech-notes {
+			margin-top: 12px;
+			padding: 12px;
+			background: #f5f5f5;
+			border: 1px solid #e5e5e5;
+			border-radius: 3px;
+			border-left: 3px solid #222;
+		}
+
+		.tech-title {
+			font-size: 10px;
+			text-transform: uppercase;
+			letter-spacing: 1.2px;
+			color: #888;
+			font-weight: 700;
+			margin-bottom: 8px;
+			display: block;
+		}
+
+		.tech-content {
+			font-size: 11px;
+			line-height: 1.5;
+			color: #666;
+		}
+
+		.tech-content strong {
+			color: #222;
+			font-weight: 600;
+		}
+
+		.tech-content p {
+			margin-bottom: 6px;
+		}
+
+		/* ===== RESPONSIVE ===== */
+		@media (max-width: 1200px) {
 			.main-container {
 				grid-template-columns: 1fr;
 				gap: 12px;
 			}
 
-			.control-sidebar {
-				grid-column: 1;
-				max-height: 120px;
-			}
-
-			.control-bar {
-				grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+			.control-panel {
+				max-height: 200px;
 			}
 		}
 
 		audio {
 			display: none;
+		}
+
+		/* Footer info */
+		.info-text {
+			font-size: 10px;
+			color: #999;
+			margin-top: 4px;
+			line-height: 1.4;
 		}
 	</style>
 
@@ -493,123 +579,213 @@
 
 <body>
 
-	<!-- Header -->
+	<!-- ===== HERO HEADER ===== -->
 	<header>
-		<h1>WebGL Shader Playground</h1>
-		<p class="subtitle">Real-time material and stylized shading studies</p>
+		<h1>Shader Playground</h1>
+		<p class="subtitle">A sculptural material lab for real-time model presentation</p>
 	</header>
 
-	<!-- Main Container -->
+	<!-- ===== MAIN CONTENT ===== -->
 	<div class="main-container">
 		
-		<!-- Canvas -->
-		<div class="canvas-container">
-			<canvas id="gl-canvas" width="1024" height="768"></canvas>
+		<!-- LEFT: Canvas Display (Single Canvas Only) -->
+		<div class="canvas-wrapper">
+			<div class="canvas-container" style="display: flex;">
+				<canvas id="gl-canvas" width="1024" height="768"></canvas>
+			</div>
 		</div>
 
-		<!-- Right Sidebar Controls -->
-		<div class="control-sidebar">
-			
-			<!-- Shader Presets -->
-			<div class="control-group">
-				<span class="control-group-title">Shader Presets</span>
-				<button class="preset-button" onclick="setShaderPreset(-1)">Phong/Blinn-Phong</button>
+		<!-- RIGHT: Control Panel -->
+		<div class="control-panel">
+
+			<!-- SECTION A: View Settings -->
+			<div class="panel-section">
+				<span class="section-title">View</span>
 				
-				<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e0e0e0;">
-					<span style="font-size: 10px; color: #999; font-weight: 600;">Form / Analysis</span>
-					<button class="preset-button" onclick="setShaderPreset(0)">Clay</button>
-					<button class="preset-button" onclick="setShaderPreset(1)">Normal View</button>
-					<button class="preset-button" onclick="setShaderPreset(2)">Wire Overlay</button>
+				<div class="control-row">
+					<label class="control-label">Projection</label>
+					<div class="button-group">
+						<button id="orthButton" class="small-button" onclick="setProjection(0)">Ortho</button>
+						<button id="perspButton" class="small-button" onclick="setProjection(1)">Perspective</button>
+					</div>
 				</div>
 
-				<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e0e0e0;">
-					<span style="font-size: 10px; color: #999; font-weight: 600;">Material</span>
-					<button class="preset-button" onclick="setShaderPreset(3)">Ceramic</button>
-					<button class="preset-button" onclick="setShaderPreset(4)">Pearl</button>
-					<button class="preset-button" onclick="setShaderPreset(5)">Chrome</button>
+				<div class="control-row">
+					<label class="control-label">Camera</label>
+					<div class="button-group full">
+						<button class="small-button" onclick="resetCamera()">Reset</button>
+					</div>
 				</div>
 
-				<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #e0e0e0;">
-					<span style="font-size: 10px; color: #999; font-weight: 600;">Stylized</span>
-					<button class="preset-button" onclick="setShaderPreset(6)">Fresnel Rim</button>
-					<button class="preset-button" onclick="setShaderPreset(7)">Toon Outline</button>
-					<button class="preset-button" onclick="setShaderPreset(8)">Hologram</button>
+				<div class="control-row">
+					<label class="control-label">Auto Rotate</label>
+					<div class="slider-container">
+						<input type="range" id="rotationSpeed" min="0" max="100" value="30" oninput="updateRotationSpeed(this.value)">
+						<div class="slider-label">
+							<span>Off</span>
+							<span id="rotationValue" style="font-weight: 600;">0.3</span>
+							<span>Fast</span>
+						</div>
+					</div>
 				</div>
 			</div>
 
-			<!-- Material Colors (Quick Switch) -->
-			<div class="control-group">
-				<span class="control-group-title">Material Colors</span>
-				<button class="preset-button" onclick="setMaterialGold()">Gold</button>
-				<button class="preset-button" onclick="setMaterialRed()">Red</button>
-				<button class="preset-button" onclick="setMaterialSteel()">Steel</button>
-				<button class="preset-button" onclick="setMaterialCopper()">Copper</button>
-			</div>
-
-			<!-- Geometry -->
-			<div class="control-group">
-				<span class="control-group-title">Geometry</span>
-				<div class="button-row">
-					<button id="surface1" onclick="switchGeometry(0)">Torus</button>
-					<button id="surface2" onclick="switchGeometry(1)">Vase</button>
+			<!-- SECTION B: Lighting -->
+			<div class="panel-section">
+				<span class="section-title">Lighting</span>
+				
+				<div class="control-row">
+					<label class="control-label">Light Position</label>
+					<div class="button-group full">
+						<button id="lightPos1" class="small-button" onclick="setLightPosition(0)">Fixed (3,4,4)</button>
+					</div>
+					<div class="button-group full">
+						<button id="lightPos2" class="small-button" onclick="setLightPosition(1)">Eye-Track</button>
+					</div>
 				</div>
-				<button id="surface3" onclick="switchGeometry(2)" style="width: 100%;">Sphere</button>
-			</div>
 
-			<!-- Light Position -->
-			<div class="control-group">
-				<span class="control-group-title">Light</span>
-				<button id="lightPos1" onclick="setLightPosition(0)" style="width: 100%; margin-bottom: 6px;">Position A (3,4,4)</button>
-				<button id="lightPos2" onclick="setLightPosition(1)" style="width: 100%;">Position B (Eye)</button>
-			</div>
+				<div class="control-row">
+					<label class="control-label">Intensity</label>
+					<div class="slider-container">
+						<input type="range" id="lightIntensity" min="0" max="200" value="100" oninput="updateLightIntensity(this.value)">
+						<div class="slider-label">
+							<span>0%</span>
+							<span id="intensityValue" style="font-weight: 600;">1.00</span>
+							<span>200%</span>
+						</div>
+					</div>
+				</div>
 
-			<!-- Animation -->
-			<div class="control-group">
-				<span class="control-group-title">Physics</span>
-				<button id="animButton" onclick="toggleAnimation()" style="width: 100%;">Start Drop</button>
-				<p class="info-text">Drop the object and watch it bounce with realistic physics.</p>
-			</div>
-
-		</div>
-
-	</div>
-
-	<!-- Bottom Control Bar -->
-	<div class="control-bar">
-		
-		<!-- Projection -->
-		<div class="control-item">
-			<label class="control-label">Projection</label>
-			<div class="control-buttons">
-				<button id="orthButton" onclick="setProjection(0)">Orthographic</button>
-				<button id="perspButton" onclick="setProjection(1)">Perspective</button>
-			</div>
-		</div>
-
-		<!-- Light Intensity -->
-		<div class="control-item">
-			<div class="control-label">Light Intensity</div>
-			<div class="slider-container">
-				<input type="range" id="lightIntensity" min="0" max="200" value="100" oninput="updateLightIntensity(this.value)">
-				<div class="slider-label" style="margin-top: 4px;">
-					<span>0</span>
-					<span id="intensityValue" style="font-weight: 600;">1.0</span>
-					<span>2.0</span>
+				<div class="control-row">
+					<label class="control-label">Ambient</label>
+					<div class="slider-container">
+						<input type="range" id="ambientSlider" min="0" max="100" value="40" oninput="updateAmbient(this.value)">
+						<div class="slider-label">
+							<span>0%</span>
+							<span id="ambientValue" style="font-weight: 600;">0.40</span>
+							<span>100%</span>
+						</div>
+					</div>
 				</div>
 			</div>
-		</div>
 
-		<!-- Auto Rotation -->
-		<div class="control-item">
-			<div class="control-label">Auto Rotation</div>
-			<div class="slider-container">
-				<input type="range" id="rotationSpeed" min="0" max="100" value="30" oninput="updateRotationSpeed(this.value)">
-				<div class="slider-label" style="margin-top: 4px;">
-					<span>Off</span>
-					<span id="rotationValue" style="font-weight: 600;">0.3</span>
-					<span>Fast</span>
+			<!-- SECTION C: Material & Shader Params (Dynamic) -->
+			<div class="panel-section">
+				<span class="section-title">Material / Shader</span>
+				
+				<div class="control-row">
+					<label class="control-label">Shader Preset</label>
+					<div class="button-group full">
+						<button id="shaderBtn" class="small-button active" onclick="setShaderPreset(-1)">Phong</button>
+					</div>
+				</div>
+
+				<div class="control-row">
+					<label class="control-label">Form / Analysis</label>
+					<div class="button-group">
+						<button class="small-button" onclick="setShaderPreset(0)">Clay</button>
+						<button class="small-button" onclick="setShaderPreset(1)">Normal</button>
+					</div>
+					<div class="button-group full">
+						<button class="small-button" onclick="setShaderPreset(2)">Wire</button>
+					</div>
+				</div>
+
+				<div class="control-row">
+					<label class="control-label">Material</label>
+					<div class="button-group">
+						<button class="small-button" onclick="setShaderPreset(3)">Ceramic</button>
+						<button class="small-button" onclick="setShaderPreset(4)">Pearl</button>
+					</div>
+					<div class="button-group full">
+						<button class="small-button" onclick="setShaderPreset(5)">Chrome</button>
+					</div>
+				</div>
+
+				<div class="control-row">
+					<label class="control-label">Stylized</label>
+					<div class="button-group">
+						<button class="small-button" onclick="setShaderPreset(6)">Fresnel</button>
+						<button class="small-button" onclick="setShaderPreset(7)">Toon</button>
+					</div>
+					<div class="button-group full">
+						<button class="small-button" onclick="setShaderPreset(8)">Hologram</button>
+					</div>
+				</div>
+
+				<div class="control-row">
+					<label class="control-label">Material Colors</label>
+					<div class="button-group">
+						<button class="small-button" onclick="setMaterialGold()">Gold</button>
+						<button class="small-button" onclick="setMaterialRed()">Red</button>
+					</div>
+					<div class="button-group">
+						<button class="small-button" onclick="setMaterialSteel()">Steel</button>
+						<button class="small-button" onclick="setMaterialCopper()">Copper</button>
+					</div>
+				</div>
+
+				<div class="control-row">
+					<label class="control-label">Shininess</label>
+					<div class="slider-container">
+						<input type="range" id="shininessSlider" min="1" max="200" value="100" oninput="updateShininess(this.value)">
+						<div class="slider-label">
+							<span>Matte</span>
+							<span id="shininessValue" style="font-weight: 600;">100</span>
+							<span>Mirror</span>
+						</div>
+					</div>
 				</div>
 			</div>
+
+			<!-- SECTION D: Display & Comparison -->
+			<div class="panel-section">
+				<span class="section-title">Display</span>
+				
+				<div class="control-row">
+					<label class="control-label">Geometry</label>
+					<div class="button-group">
+						<button id="surface1" class="small-button" onclick="switchGeometry(0)">Torus</button>
+						<button id="surface2" class="small-button" onclick="switchGeometry(1)">Vase</button>
+					</div>
+					<div class="button-group full">
+						<button id="surface3" class="small-button" onclick="switchGeometry(2)">Sphere</button>
+					</div>
+				</div>
+
+				<div class="control-row">
+					<label class="control-label">Skybox</label>
+					<div class="button-group full">
+						<button id="skyboxNvlobby" class="small-button active" onclick="setSkybox('nvlobby_new')">nvlobby</button>
+					</div>
+				</div>
+
+
+
+				<div class="control-row">
+					<label class="control-label">Physics</label>
+					<div class="button-group full">
+						<button id="animButton" class="small-button" onclick="toggleAnimation()">Start Drop</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Technical Notes -->
+			<div class="tech-notes">
+				<span class="tech-title">Technique</span>
+				<div class="tech-content">
+					<div id="techShaderName"><strong>Phong Illumination</strong></div>
+					<div id="techKeywords" style="margin-top: 4px; font-size: 10px; color: #999;">
+						<strong>Keywords:</strong> <span id="techKeywordsList">Blinn-Phong, specular highlights</span>
+					</div>
+					
+					<!-- Current Parameters Display -->
+					<div id="techParams" style="margin-top: 6px; padding: 4px 3px; border-top: 1px solid #e0e0e0;">
+						<div id="paramsList" style="font-size: 8px; color: #555; line-height: 1.6; font-family: 'Monaco', 'Menlo', monospace;"></div>
+					</div>
+				</div>
+			</div>
+
 		</div>
 
 	</div>
@@ -617,19 +793,66 @@
 	<audio id="myaudio" src="assets/bass-drop.mp3" preload="auto"></audio>
 
 	<script>
-		// Initialize UI on load
+		// Shader Metadata
+		const shaderMetadata = {
+			'-1': {
+				name: 'Phong Illumination',
+				keywords: 'Blinn-Phong, specular highlights, inverse-transpose normal'
+			},
+			'0': {
+				name: 'Clay/Matte',
+				keywords: 'Lambertian, diffuse shading, matte finish'
+			},
+			'1': {
+				name: 'Normal Visualization',
+				keywords: 'normal map, surface analysis, tangent-space'
+			},
+			'2': {
+				name: 'Wire Overlay',
+				keywords: 'edge detection, debug visualization'
+			},
+			'3': {
+				name: 'Ceramic/Semigloss',
+				keywords: 'ceramic material, diffuse + moderate specular'
+			},
+			'4': {
+				name: 'Pearl/Glossy',
+				keywords: 'glossy material, high shader exponent, anisotropic'
+			},
+			'5': {
+				name: 'Chrome/Mirror',
+				keywords: 'mirror finish, metallic, extreme shader power'
+			},
+			'6': {
+				name: 'Fresnel Rim',
+				keywords: 'fresnel effect, rim light, view-dependent'
+			},
+			'7': {
+				name: 'Toon Shading',
+				keywords: 'cel shading, stylized, quantization'
+			},
+			'8': {
+				name: 'Hologram',
+				keywords: 'hologram effect, time-based animation, post-processing'
+			}
+		};
+
+		// Initialize UI on page load
 		window.addEventListener('load', function() {
-			// Set initial active buttons
+			// Set active states for initial buttons
 			document.getElementById('surface1').classList.add('active');
 			document.getElementById('orthButton').classList.add('active');
 			document.getElementById('lightPos1').classList.add('active');
+			document.getElementById('skyboxNvlobby').classList.add('active');
 			
-			// Set Phong/Blinn-Phong as initial active shader preset
-			var presetButtons = document.querySelectorAll('.preset-button');
-			if (presetButtons.length > 0) {
-				presetButtons[0].classList.add('active');
-			}
+			// Initialize parameters display (will be called by app.js after shader loads)
 		});
+
+		// Skybox selector
+		function setSkybox(name) {
+			console.log('Setting skybox to:', name);
+			document.getElementById('skyboxNvlobby').classList.toggle('active', name === 'nvlobby_new');
+		}
 	</script>
 
 </body>

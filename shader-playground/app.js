@@ -261,6 +261,14 @@ window.onload = function init() {
   }
 
   console.log("Initialization complete, starting render loop");
+  
+  // Load preset from URL if present
+  try {
+    loadPresetFromURL();
+  } catch(e) {
+    console.warn("Failed to load preset from URL:", e);
+  }
+  
   render();
 };
 
@@ -353,6 +361,7 @@ function setProjection(mode) {
   // Update button states
   document.getElementById('orthButton').classList.toggle('active', mode === 0);
   document.getElementById('perspButton').classList.toggle('active', mode === 1);
+  updateParamsDisplay();
 }
 
 // ==================== GEOMETRY SWITCHING ====================
@@ -419,9 +428,228 @@ function switchGeometry(geoType) {
 
 // ==================== SHADER PRESETS ====================
 function setShaderPreset(preset) {
+  // Direct shader switching without fade effect
   currentShaderPreset = preset;
   var shaderPresetLoc = gl.getUniformLocation(program, "shaderPreset");
   gl.uniform1i(shaderPresetLoc, preset);
+  updateTechNotes(preset);
+  updatePresetDetails(preset);
+  updateParamsDisplay();
+}
+
+// ==================== TECHNICAL NOTES ====================
+var shaderMetadata = {
+  "-1": {
+    name: "Phong Illumination",
+    description: "Classic Phong shading model",
+    keywords: "diffuse, specular, ambient"
+  },
+  "0": {
+    name: "Normal Visualization",
+    description: "Display surface normals as colors",
+    keywords: "debug, normals, visualization"
+  },
+  "1": {
+    name: "Clay/Matte",
+    description: "Non-reflective, diffuse-dominated",
+    keywords: "matte, diffuse, unsaturated"
+  },
+  "2": {
+    name: "Ceramic",
+    description: "Smooth, slightly glossy surface",
+    keywords: "smooth, gloss, specular"
+  },
+  "3": {
+    name: "Pearl",
+    description: "Iridescent, angle-dependent coloring",
+    keywords: "iridescent, fresnel, color-shift"
+  },
+  "4": {
+    name: "Chrome/Metal",
+    description: "Highly reflective metallic surface",
+    keywords: "metallic, reflective, mirror"
+  },
+  "5": {
+    name: "Fresnel Effect",
+    description: "View-angle dependent reflectance",
+    keywords: "fresnel, view-dependent, rim-light"
+  },
+  "6": {
+    name: "Toon Shading",
+    description: "Cel-shaded, cartoon-like appearance",
+    keywords: "cel, cartoon, procedural"
+  },
+  "7": {
+    name: "Hologram",
+    description: "Holographic, glitchy appearance",
+    keywords: "hologram, glitch, effect"
+  },
+  "8": {
+    name: "Wireframe",
+    description: "Show geometry edges and wireframe",
+    keywords: "wireframe, edges, debug"
+  }
+};
+
+function updateTechNotes(preset) {
+  var metadata = shaderMetadata[preset.toString()];
+  if (!metadata) {
+    metadata = shaderMetadata["-1"];
+  }
+  
+  var shaderNameEl = document.getElementById('techShaderName');
+  var keywordsEl = document.getElementById('techKeywords');
+  
+  if (shaderNameEl) {
+    shaderNameEl.innerHTML = '<strong>' + metadata.name + '</strong>';
+  }
+  if (keywordsEl) {
+    keywordsEl.innerHTML = 'Keywords: ' + metadata.keywords;
+  }
+}
+
+// ==================== PARAMETERS DISPLAY ====================
+function getShaderName(preset) {
+  var meta = shaderMetadata[preset.toString()];
+  if (!meta) meta = shaderMetadata["-1"];
+  return meta.name;
+}
+
+function getIntensityLabel() {
+  var slider = document.getElementById('lightIntensity');
+  var val = slider ? parseInt(slider.value) : 100;
+  return val + ' → 光照强度 ' + val + '%';
+}
+
+function getAmbientLabel() {
+  var slider = document.getElementById('ambientSlider');
+  var val = slider ? parseInt(slider.value) : 40;
+  return val + ' → 环境光 ' + val + '%';
+}
+
+function getShininessLabel() {
+  var slider = document.getElementById('shininessSlider');
+  var val = slider ? parseInt(slider.value) : 100;
+  return val + ' → 光泽度 ' + val;
+}
+
+function getLightPosLabel() {
+  var pos = lightPositionMode !== undefined ? lightPositionMode : 0;
+  var labels = ['0 → 固定位置 (3,4,4)', '1 → 跟随相机 (Eye-Track)'];
+  return labels[pos] || labels[0];
+}
+
+function getProjModeLabel() {
+  var mode = projectionMode !== undefined ? projectionMode : 0;
+  var labels = ['0 → 正交投影 (Orthographic)', '1 → 透视投影 (Perspective)'];
+  return labels[mode] || labels[0];
+}
+
+function updateParamsDisplay() {
+  var preset = currentShaderPreset;
+  var shaderName = getShaderName(preset);
+  var shaderNum = preset === -1 ? '-1' : preset;
+  
+  var html = '';
+  html += '<strong>shader=' + shaderNum + '</strong> → #' + preset + ' ' + shaderName + '<br>';
+  html += '- intensity=' + getIntensityLabel() + '<br>';
+  html += '- ambient=' + getAmbientLabel() + '<br>';
+  html += '- shininess=' + getShininessLabel() + '<br>';
+  html += '- lightPos=' + getLightPosLabel() + '<br>';
+  html += '- projMode=' + getProjModeLabel();
+  
+  var paramsList = document.getElementById('paramsList');
+  if (paramsList) {
+    paramsList.innerHTML = html;
+  }
+}
+
+
+// ==================== AMBIENT LIGHT ====================
+function updateAmbient(value) {
+  var factor = value / 100.0;
+  document.getElementById('ambientValue').textContent = factor.toFixed(2);
+  
+  // Scale ambient light component
+  var scaledAmbient = vec4(
+    lightAmbient[0] * factor,
+    lightAmbient[1] * factor,
+    lightAmbient[2] * factor,
+    lightAmbient[3]
+  );
+  
+  ambientColor = mult(scaledAmbient, materialAmbient);
+  gl.uniform4fv(
+    gl.getUniformLocation(program, "ambientProduct"),
+    flatten(ambientColor)
+  );
+  
+  updateTechNotes();
+  updateParamsDisplay();
+}
+
+// ==================== MATERIAL SHININESS ====================
+function updateShininess(value) {
+  materialShininess = parseFloat(value);
+  document.getElementById('shininessValue').textContent = materialShininess.toFixed(0);
+  
+  gl.uniform1f(
+    gl.getUniformLocation(program, "shininess"),
+    materialShininess
+  );
+  
+  updateTechNotes();
+  updateParamsDisplay();
+}
+
+// ==================== CAMERA CONTROLS ====================
+function resetCamera() {
+  // Reset camera to default position
+  viewer.radius = 3;
+  viewer.theta = 0;
+  viewer.phi = Math.PI / 4;
+  
+  // Update eye position
+  viewer.eye[0] = viewer.radius * Math.sin(viewer.phi) * Math.cos(viewer.theta);
+  viewer.eye[1] = viewer.radius * Math.cos(viewer.phi);
+  viewer.eye[2] = viewer.radius * Math.sin(viewer.phi) * Math.sin(viewer.theta);
+  
+  console.log("Camera reset to default position");
+}
+
+// ==================== SKYBOX MANAGEMENT ====================
+var currentSkybox = "nvlobby_new";
+
+function setSkybox(name) {
+  // Store current selection
+  currentSkybox = name;
+  
+  // For now, only nvlobby_new is available
+  // In the future, this will switch between different skybox textures
+  if (name === "nvlobby_new") {
+    console.log("Skybox: Lobby Environment (current)");
+  } else {
+    console.warn("Skybox '" + name + "' not yet available");
+  }
+  
+  // TODO: Implement dynamic skybox switching via SkyboxManager
+  // This requires loading additional cubemap images
+  console.log("Skybox changed to: " + name);
+}
+
+// ==================== COMPARE MODE ====================
+// Simplified: Quick shader comparison by clicking preset buttons
+// No split-screen rendering - just fast shader switching
+
+var lastShaderForComparison = -1;
+
+function quickCompareShaders(shader1, shader2) {
+  // Quick toggle between two shaders for comparison
+  if (currentShaderPreset === shader1) {
+    setShaderPreset(shader2);
+  } else {
+    setShaderPreset(shader1);
+  }
 }
 
 // ==================== LIGHT POSITION ====================
@@ -446,6 +674,7 @@ function setLightPosition(pos) {
   
   document.getElementById('lightPos1').classList.toggle('active', lightPositionMode === 0);
   document.getElementById('lightPos2').classList.toggle('active', lightPositionMode === 1);
+  updateParamsDisplay();
 }
 
 // ==================== LIGHT INTENSITY ====================
@@ -472,6 +701,9 @@ function updateLightIntensity(value) {
     gl.getUniformLocation(program, "specularProduct"),
     flatten(specularColor)
   );
+  
+  updateTechNotes();
+  updateParamsDisplay();
 }
 
 // ==================== AUTO ROTATION ====================
@@ -847,4 +1079,223 @@ function configureTexture(myimage) {
   gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
   gl.uniform1i(gl.getUniformLocation(program, "texture"), 0);
+}
+
+// ==================== SHADER TRANSITION EFFECTS ====================
+// DISABLED: Transition effects removed as per user request
+/*
+var lastShaderPreset = -1;
+var transitionTime = 0.0;
+var isTransitioning = false;
+var transitionDuration = 0.4; // seconds
+
+function setShaderPresetWithTransition(preset) {
+  if (preset !== lastShaderPreset) {
+    isTransitioning = true;
+    transitionTime = 0.0;
+    
+    // Add visual feedback
+    var canvas = document.getElementById('gl-canvas');
+    if (canvas) {
+      canvas.classList.add('shader-transitioning');
+      setTimeout(function() {
+        canvas.classList.remove('shader-transitioning');
+      }, 400);
+    }
+    
+    lastShaderPreset = preset;
+  }
+  
+  // Apply the shader immediately
+  currentShaderPreset = preset;
+  var shaderPresetLoc = gl.getUniformLocation(program, "shaderPreset");
+  gl.uniform1i(shaderPresetLoc, preset);
+  
+  // Update technical notes and preset details
+  updateTechNotes(preset);
+  updatePresetDetails(preset);
+}
+*/
+
+// ==================== PRESET DETAILS & SHARING ====================
+var presetStates = {};
+
+function updatePresetDetails(preset) {
+  // Store current state
+  presetStates.shader = preset;
+  presetStates.intensity = document.getElementById('lightIntensity') ? document.getElementById('lightIntensity').value : 100;
+  presetStates.ambient = document.getElementById('ambientSlider') ? document.getElementById('ambientSlider').value : 40;
+  presetStates.shininess = document.getElementById('shininessSlider') ? document.getElementById('shininessSlider').value : 100;
+  presetStates.geometry = currentShaderPreset; // Store geometry type
+  
+  // Update preset info display
+  var presetInfo = document.getElementById('presetInfo');
+  if (presetInfo) {
+    var info = 'Shader: ' + getShaderName(preset);
+    info += ' | Intensity: ' + (presetStates.intensity / 100).toFixed(2);
+    info += ' | Shininess: ' + presetStates.shininess;
+    presetInfo.innerHTML = '<span style="font-size: 9px; color: #777;">' + info + '</span>';
+  }
+}
+
+function getShaderName(preset) {
+  var aliases = {
+    '-1': 'Phong',
+    '0': 'Normal View',
+    '1': 'Clay',
+    '2': 'Ceramic',
+    '3': 'Pearl',
+    '4': 'Chrome',
+    '5': 'Fresnel',
+    '6': 'Toon',
+    '7': 'Hologram',
+    '8': 'Wire'
+  };
+  return aliases[preset.toString()] || 'Unknown';
+}
+
+// ==================== URL SHARING ====================
+function generatePresetURL() {
+  var params = new URLSearchParams();
+  
+  // Add all current settings to URL
+  params.set('shader', currentShaderPreset);
+  params.set('intensity', document.getElementById('lightIntensity') ? document.getElementById('lightIntensity').value : 100);
+  params.set('ambient', document.getElementById('ambientSlider') ? document.getElementById('ambientSlider').value : 40);
+  params.set('shininess', document.getElementById('shininessSlider') ? document.getElementById('shininessSlider').value : 100);
+  params.set('lightPos', lightPositionMode);
+  params.set('projMode', projectionMode);
+  
+  // Build full URL
+  var baseURL = window.location.href.split('?')[0];
+  return baseURL + '?' + params.toString();
+}
+
+function copyPresetLink() {
+  var url = generatePresetURL();
+  var btn = document.getElementById('copyLinkBtn');
+  
+  // Copy to clipboard
+  navigator.clipboard.writeText(url).then(function() {
+    // Visual feedback
+    var originalText = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('active');
+    
+    setTimeout(function() {
+      btn.textContent = originalText;
+      btn.classList.remove('active');
+    }, 2000);
+  }).catch(function(err) {
+    console.error('Failed to copy:', err);
+    // Fallback: select text for manual copy
+    var textArea = document.createElement('textarea');
+    textArea.value = url;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+      document.execCommand('copy');
+      btn.textContent = '✓ Copied!';
+      btn.classList.add('active');
+      setTimeout(function() {
+        btn.textContent = '🔗 Copy Link';
+        btn.classList.remove('active');
+      }, 2000);
+    } catch(e) {
+      console.error('Fallback copy failed:', e);
+    }
+    document.body.removeChild(textArea);
+  });
+}
+
+function loadPresetFromURL() {
+  var params = new URLSearchParams(window.location.search);
+  
+  if (params.has('shader')) {
+    var shaderID = parseInt(params.get('shader'));
+    setShaderPreset(shaderID);
+  }
+  
+  if (params.has('intensity')) {
+    var intensityVal = parseInt(params.get('intensity'));
+    var intensitySlider = document.getElementById('lightIntensity');
+    if (intensitySlider) {
+      intensitySlider.value = intensityVal;
+      updateLightIntensity(intensityVal);
+    }
+  }
+  
+  if (params.has('ambient')) {
+    var ambientVal = parseInt(params.get('ambient'));
+    var ambientSlider = document.getElementById('ambientSlider');
+    if (ambientSlider) {
+      ambientSlider.value = ambientVal;
+      updateAmbient(ambientVal);
+    }
+  }
+  
+  if (params.has('shininess')) {
+    var shininessVal = parseInt(params.get('shininess'));
+    var shininessSlider = document.getElementById('shininessSlider');
+    if (shininessSlider) {
+      shininessSlider.value = shininessVal;
+      updateShininess(shininessVal);
+    }
+  }
+  
+  if (params.has('lightPos')) {
+    setLightPosition(parseInt(params.get('lightPos')));
+  }
+  
+  if (params.has('projMode')) {
+    setProjection(parseInt(params.get('projMode')));
+  }
+}
+
+// ==================== RESET TO DEFAULTS ====================
+function resetToDefaults() {
+  // Reset all settings to initial state
+  setShaderPreset(-1);
+  
+  var intensitySlider = document.getElementById('lightIntensity');
+  if (intensitySlider) {
+    intensitySlider.value = 100;
+    updateLightIntensity(100);
+  }
+  
+  var ambientSlider = document.getElementById('ambientSlider');
+  if (ambientSlider) {
+    ambientSlider.value = 40;
+    updateAmbient(40);
+  }
+  
+  var shininessSlider = document.getElementById('shininessSlider');
+  if (shininessSlider) {
+    shininessSlider.value = 100;
+    updateShininess(100);
+  }
+  
+  var rotationSlider = document.getElementById('rotationSpeed');
+  if (rotationSlider) {
+    rotationSlider.value = 30;
+    updateRotationSpeed(30);
+  }
+  
+  // Reset camera and material
+  resetCamera();
+  setMaterialGold();
+  setLightPosition(0);
+  setProjection(0);
+  switchGeometry(0); // Back to torus
+  
+  // Visual feedback
+  var resetBtn = document.getElementById('resetBtn');
+  if (resetBtn) {
+    resetBtn.classList.add('active');
+    setTimeout(function() {
+      resetBtn.classList.remove('active');
+    }, 300);
+  }
+  
+  console.log('Reset to default settings');
 }
