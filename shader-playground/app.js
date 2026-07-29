@@ -31,7 +31,7 @@ var viewer = {
 
   radius: 3,
   theta: 0,
-  phi: 0,
+  phi: Math.PI / 4,
 };
 
 var left = -2.0;
@@ -772,6 +772,10 @@ function animation() {
 function render() {
   gl.enable(gl.DEPTH_TEST);
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  // Keep the camera away from the poles where its view direction becomes
+  // parallel to the up vector and lookAt() produces an invalid matrix.
+  viewer.phi = Math.max(0.1, Math.min(Math.PI - 0.1, viewer.phi));
 
   // Update camera
   viewer.eye[0] = viewer.radius * Math.sin(viewer.phi) * Math.cos(viewer.theta);
