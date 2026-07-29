@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebGL Shader Playground v2</title>
+  <link rel="stylesheet" href="./styles/main.css">
+</head>
+<body>
+  <header>
+    <h1>WebGL Shader Playground</h1>
+    <p class="subtitle">Real-time shader visualization tool</p>
+  </header>
+
+  <div class="main-container">
+    <div class="canvas-wrapper">
+      <canvas id="gl-canvas"></canvas>
+      <div id="error-overlay" class="error-overlay" style="display: none;">
+        <div class="error-box">
+          <strong>Shader Compilation Error</strong>
+          <pre id="error-message"></pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="control-panel">
+      <div class="panel-section">
+        <div class="section-title">VIEW</div>
+        <div class="button-group">
+          <button id="orthBtn" class="btn active">Orthographic</button>
+          <button id="perspBtn" class="btn">Perspective</button>
+        </div>
+        <button id="resetCameraBtn" class="btn btn-full">Reset Camera</button>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">LIGHTING</div>
+        <div class="control-group">
+          <label class="control-label">Light Position</label>
+          <div class="button-group">
+            <button id="lightPosFixedBtn" class="btn active">Fixed</button>
+            <button id="lightPosEyeBtn" class="btn">Eye-Track</button>
+          </div>
+        </div>
+
+        <div class="slider-group">
+          <label class="control-label">Intensity</label>
+          <input type="range" id="intensitySlider" min="0" max="200" value="100">
+          <div class="slider-value"><span id="intensityValue">1.00</span></div>
+        </div>
+
+        <div class="slider-group">
+          <label class="control-label">Ambient</label>
+          <input type="range" id="ambientSlider" min="0" max="100" value="25">
+          <div class="slider-value"><span id="ambientValue">0.25</span></div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">MATERIAL</div>
+        <div class="control-group">
+          <label class="control-label">Shader</label>
+          <div class="button-group triple">
+            <button data-shader="-1" class="shader-btn active">Phong</button>
+            <button data-shader="0" class="shader-btn">Normal</button>
+            <button data-shader="1" class="shader-btn">Clay</button>
+            <button data-shader="2" class="shader-btn">Ceramic</button>
+            <button data-shader="3" class="shader-btn">Pearl</button>
+            <button data-shader="4" class="shader-btn">Chrome</button>
+            <button data-shader="5" class="shader-btn">Fresnel</button>
+            <button data-shader="6" class="shader-btn">Toon</button>
+            <button data-shader="7" class="shader-btn">Hologram</button>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <label class="control-label">Colors</label>
+          <div class="button-group">
+            <button id="colorGoldBtn" class="btn">Gold</button>
+            <button id="colorRedBtn" class="btn">Red</button>
+            <button id="colorSteelBtn" class="btn">Steel</button>
+            <button id="colorCopperBtn" class="btn">Copper</button>
+          </div>
+        </div>
+
+        <div class="slider-group">
+          <label class="control-label">Shininess</label>
+          <input type="range" id="shininessSlider" min="1" max="200" value="100">
+          <div class="slider-value"><span id="shininessValue">100</span></div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">DISPLAY</div>
+        <div class="control-group">
+          <label class="control-label">Geometry</label>
+          <div class="button-group">
+            <button id="geomTorusBtn" class="btn active">Torus</button>
+            <button id="geomVaseBtn" class="btn">Vase</button>
+            <button id="geomSphereBtn" class="btn">Sphere</button>
+          </div>
+        </div>
+
+        <button id="animPlayBtn" class="btn btn-full">Play Animation</button>
+
+        <div class="slider-group">
+          <label class="control-label">Auto Rotate</label>
+          <input type="range" id="rotationSlider" min="0" max="100" value="0">
+          <div class="slider-value"><span id="rotationValue">0.00</span></div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <div class="section-title">INFO</div>
+        <div class="info-display">
+          <div id="fpsDisplay" class="info-line">FPS: --</div>
+          <div id="shaderDisplay" class="info-line">Shader: Phong</div>
+          <div id="statsDisplay" class="info-line">Vertices: 0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <audio id="dropSound" src="./assets/bass-drop.mp3"></audio>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>
