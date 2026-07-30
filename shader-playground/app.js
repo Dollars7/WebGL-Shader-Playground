@@ -441,53 +441,53 @@ function setShaderPreset(preset) {
 var shaderMetadata = {
   "-1": {
     name: "Phong Illumination",
-    description: "Classic Phong shading model",
-    keywords: "diffuse, specular, ambient"
+    description: "Classic Blinn-Phong shading model",
+    keywords: "Blinn-Phong, specular highlights, inverse-transpose normal"
   },
   "0": {
-    name: "Normal Visualization",
-    description: "Display surface normals as colors",
-    keywords: "debug, normals, visualization"
+    name: "Clay/Matte",
+    description: "Non-reflective, diffuse-dominated surface",
+    keywords: "Lambertian, diffuse shading, matte finish"
   },
   "1": {
-    name: "Clay/Matte",
-    description: "Non-reflective, diffuse-dominated",
-    keywords: "matte, diffuse, unsaturated"
+    name: "Normal Visualization",
+    description: "Display surface normals as colors",
+    keywords: "normal map, surface analysis, tangent-space"
   },
   "2": {
-    name: "Ceramic",
-    description: "Smooth, slightly glossy surface",
-    keywords: "smooth, gloss, specular"
+    name: "Wire Overlay",
+    description: "Visualize geometry edges",
+    keywords: "edge detection, debug visualization"
   },
   "3": {
-    name: "Pearl",
-    description: "Iridescent, angle-dependent coloring",
-    keywords: "iridescent, fresnel, color-shift"
+    name: "Ceramic/Semigloss",
+    description: "Smooth surface with moderate specular response",
+    keywords: "ceramic material, diffuse, moderate specular"
   },
   "4": {
-    name: "Chrome/Metal",
-    description: "Highly reflective metallic surface",
-    keywords: "metallic, reflective, mirror"
+    name: "Pearl/Glossy",
+    description: "Glossy, angle-dependent surface",
+    keywords: "glossy material, high shader exponent, anisotropic"
   },
   "5": {
-    name: "Fresnel Effect",
-    description: "View-angle dependent reflectance",
-    keywords: "fresnel, view-dependent, rim-light"
+    name: "Chrome/Mirror",
+    description: "Highly reflective metallic surface",
+    keywords: "mirror finish, metallic, extreme shader power"
   },
   "6": {
-    name: "Toon Shading",
-    description: "Cel-shaded, cartoon-like appearance",
-    keywords: "cel, cartoon, procedural"
+    name: "Fresnel Rim",
+    description: "View-angle dependent reflectance",
+    keywords: "fresnel effect, rim light, view-dependent"
   },
   "7": {
-    name: "Hologram",
-    description: "Holographic, glitchy appearance",
-    keywords: "hologram, glitch, effect"
+    name: "Toon Shading",
+    description: "Cel-shaded, cartoon-like appearance",
+    keywords: "cel shading, stylized, quantization"
   },
   "8": {
-    name: "Wireframe",
-    description: "Show geometry edges and wireframe",
-    keywords: "wireframe, edges, debug"
+    name: "Hologram",
+    description: "Animated holographic effect",
+    keywords: "hologram effect, time-based animation, post-processing"
   }
 };
 
@@ -1142,21 +1142,6 @@ function updatePresetDetails(preset) {
   }
 }
 
-function getShaderName(preset) {
-  var aliases = {
-    '-1': 'Phong',
-    '0': 'Normal View',
-    '1': 'Clay',
-    '2': 'Ceramic',
-    '3': 'Pearl',
-    '4': 'Chrome',
-    '5': 'Fresnel',
-    '6': 'Toon',
-    '7': 'Hologram',
-    '8': 'Wire'
-  };
-  return aliases[preset.toString()] || 'Unknown';
-}
 
 // ==================== URL SHARING ====================
 function generatePresetURL() {
