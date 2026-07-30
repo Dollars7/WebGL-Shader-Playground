@@ -54,7 +54,10 @@ export class BouncePhysics {
 
     this.accumulator += Math.min(frameTime, MAX_FRAME_TIME);
 
-    while (this.accumulator >= FIXED_DT) {
+    // `running` is re-checked here, not just on entry: a step can settle the
+    // object mid-frame, and the remaining substeps would otherwise keep
+    // simulating it and fire onSettled again.
+    while (this.accumulator >= FIXED_DT && this.running) {
       this.step(FIXED_DT);
       this.accumulator -= FIXED_DT;
     }

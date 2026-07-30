@@ -13,4 +13,9 @@ export default defineConfig({
     // for a bundle this small.
     minify: 'esbuild',
   },
+  test: {
+    // Tests sit next to the modules they cover. Nothing imports them, so they
+    // never reach the production bundle.
+    include: ['**/*.test.js'],
+  },
 });
