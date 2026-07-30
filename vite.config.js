@@ -9,7 +9,8 @@ export default defineConfig({
   build: {
     outDir: '../dist',
     emptyOutDir: true,
-    minify: 'terser',
+    // esbuild is Vite's default minifier; terser would be an extra dependency
+    // for a bundle this small.
+    minify: 'esbuild',
   },
-  assetsInclude: ['**/*.glsl', '**/*.vert', '**/*.frag'],
 });

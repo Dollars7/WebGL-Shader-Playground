@@ -14,7 +14,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const srcDir = join(root, 'lib', 'skyboxAssets');
+const srcDir = join(root, 'legacy', 'lib', 'skyboxAssets');
 const outDir = join(root, 'src', 'public', 'skybox');
 
 const faces = ['posx', 'negx', 'posy', 'negy', 'posz', 'negz'];

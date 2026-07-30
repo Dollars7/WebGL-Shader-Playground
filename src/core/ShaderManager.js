@@ -1,6 +1,17 @@
 /**
  * Shader compilation and management
  */
+
+// Shader sources are inlined at build time rather than fetched at runtime.
+// Fetching would 404 in production — Vite only emits files that something
+// imports — and this additionally turns a missing shader into a build error
+// instead of a runtime one, and costs the deployed page zero extra requests.
+const SHADER_SOURCES = import.meta.glob('../shaders/**/*.{vert,frag,glsl}', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
+
 export class ShaderManager {
   constructor(glContext) {
     this.glContext = glContext;
@@ -20,15 +31,15 @@ export class ShaderManager {
     ];
   }
 
-  async loadAllShaders() {
+  loadAllShaders() {
     console.log('[ShaderManager] Loading all shaders...');
 
     // Every preset shares one vertex shader; only the fragment stage differs.
-    this.vertexSource = await this.fetchSource('shaders/common.vert');
+    this.vertexSource = this.fetchSource('common.vert');
 
     for (const shader of this.shaders) {
       try {
-        await this.loadShader(shader.name);
+        this.loadShader(shader.name);
       } catch (err) {
         console.error(`[ShaderError] Failed to load ${shader.name}:`, err.message);
         throw err;
@@ -36,7 +47,7 @@ export class ShaderManager {
     }
 
     // The skybox is the one program with its own vertex stage.
-    await this.loadProgram('skybox', 'shaders/skybox.vert', 'shaders/skybox.frag');
+    this.loadProgram('skybox', 'skybox.vert', 'skybox.frag');
 
     // Set default shader
     this.useShader('phong');
@@ -44,11 +55,9 @@ export class ShaderManager {
   }
 
   /** Compile a program from an explicit vertex/fragment pair. */
-  async loadProgram(name, vertPath, fragPath) {
-    const [vertSrc, fragSrc] = await Promise.all([
-      this.fetchSource(vertPath),
-      this.fetchSource(fragPath),
-    ]);
+  loadProgram(name, vertPath, fragPath) {
+    const vertSrc = this.fetchSource(vertPath);
+    const fragSrc = this.fetchSource(fragPath);
 
     const program = this.compileProgram(vertSrc, fragSrc, name);
     if (!program) {
@@ -61,19 +70,18 @@ export class ShaderManager {
   }
 
   /**
-   * Fetch a GLSL source file. The dev server answers unknown paths with the
-   * SPA fallback HTML, so a missing shader would otherwise reach the compiler
-   * as markup and produce a baffling syntax error.
+   * Look up a GLSL source by its path relative to `src/shaders/`,
+   * e.g. 'phong.frag' or 'lib/tonemap.glsl'.
    */
-  async fetchSource(path, seen = new Set()) {
-    const res = await fetch(path);
-    if (!res.ok) {
-      throw new Error(`${path} → HTTP ${res.status}`);
-    }
+  fetchSource(path, seen = new Set()) {
+    const key = `../shaders/${path}`;
+    const src = SHADER_SOURCES[key];
 
-    const src = await res.text();
-    if (src.trimStart().startsWith('<')) {
-      throw new Error(`${path} returned HTML, not GLSL (file missing?)`);
+    if (src === undefined) {
+      const available = Object.keys(SHADER_SOURCES)
+        .map((k) => k.replace('../shaders/', ''))
+        .join(', ');
+      throw new Error(`Shader not found: ${path} (have: ${available})`);
     }
 
     return this.resolveIncludes(src, path, seen);
@@ -88,28 +96,20 @@ export class ShaderManager {
    * once per program, which both prevents redefinition errors and terminates
    * any accidental include cycle.
    */
-  async resolveIncludes(src, fromPath, seen) {
+  resolveIncludes(src, fromPath, seen) {
     const dir = fromPath.slice(0, fromPath.lastIndexOf('/') + 1);
     const pattern = /^[ \t]*#include[ \t]+"([^"]+)"[ \t]*$/gm;
 
-    const directives = [...src.matchAll(pattern)];
-    if (directives.length === 0) return src;
-
-    const resolved = await Promise.all(
-      directives.map(async (match) => {
-        const path = dir + match[1];
-        if (seen.has(path)) return '';
-        seen.add(path);
-        return this.fetchSource(path, seen);
-      })
-    );
-
-    let i = 0;
-    return src.replace(pattern, () => resolved[i++]);
+    return src.replace(pattern, (_line, includePath) => {
+      const path = dir + includePath;
+      if (seen.has(path)) return '';
+      seen.add(path);
+      return this.fetchSource(path, seen);
+    });
   }
 
-  async loadShader(name) {
-    const fragSrc = await this.fetchSource(`shaders/${name}.frag`);
+  loadShader(name) {
+    const fragSrc = this.fetchSource(`${name}.frag`);
 
     const program = this.compileProgram(this.vertexSource, fragSrc, name);
     if (!program) {

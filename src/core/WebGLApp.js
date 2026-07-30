@@ -55,7 +55,7 @@ export class WebGLApp {
     console.log('[App] Loading resources...');
 
     try {
-      await this.shaderManager.loadAllShaders();
+      this.shaderManager.loadAllShaders();
 
       const box = Geometry.generateBox(PLATFORM.width, PLATFORM.height, PLATFORM.depth);
       this.platform.setData(box.positions, box.normals, box.texCoords, box.indices);
