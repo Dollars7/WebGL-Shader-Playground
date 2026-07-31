@@ -6,3 +6,7 @@ dist/
 *~
 .env
 .env.local
+
+# Local editor/tool state — machine-specific paths, not useful to anyone else
+.claude/
+.vscode/
