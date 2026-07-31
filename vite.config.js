@@ -2,6 +2,9 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   root: 'src',
+  // GitHub Pages serves this project from a repository subpath, not a domain
+  // root. Overridable so a fork or a custom domain doesn't have to patch this.
+  base: process.env.PUBLIC_BASE_PATH ?? '/WebGL-Shader-Playground/',
   server: {
     port: 3000,
     open: true,

@@ -28,7 +28,9 @@ export class Skybox {
     this.enabled = true;
   }
 
-  async init(basePath = 'skybox') {
+  // Resolved against the deploy base rather than the current page URL, so the
+  // faces still load when the app is served from a repository subpath.
+  async init(basePath = `${import.meta.env.BASE_URL}skybox`) {
     const gl = this.gl;
 
     this.createQuad();

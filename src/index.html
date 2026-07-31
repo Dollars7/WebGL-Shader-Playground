@@ -121,7 +121,9 @@
     </div>
   </div>
 
-  <audio id="dropSound" src="./assets/bass-drop.mp3"></audio>
+  <!-- src is assigned from JS so the bundler fingerprints and emits the file;
+       Vite does not rewrite asset URLs inside <audio> tags. -->
+  <audio id="dropSound" preload="auto"></audio>
   <script type="module" src="./main.js"></script>
 </body>
 </html>

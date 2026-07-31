@@ -4,6 +4,8 @@ Real-time shading model explorer built directly on the WebGL API — no Three.js
 no rendering framework. Nine shading models, an IBL-ready cubemap environment,
 and a fixed-timestep physics drop, all driven from a live control panel.
 
+**[Live demo](https://dollars7.github.io/WebGL-Shader-Playground/)**
+
 ```bash
 npm install
 npm run dev      # http://localhost:3000
@@ -147,11 +149,34 @@ button's `data-shader` attribute drives selection.
 
 Drag to orbit · scroll to zoom · sliders and buttons apply immediately.
 
-## Build
+## Tests
+
+```bash
+npm test
+```
+
+Covers the invariants that are slow and unreliable to verify by staring at a
+running renderer — normals unit-length and outward-facing, indices within range
+for a `UNSIGNED_SHORT` buffer, no degenerate triangles, projection matrices
+mapping to the canonical view volume, `inverse` round-tripping, and the physics
+settling identically at 60Hz and 144Hz.
+
+The suite has already earned its keep: it caught `update()` failing to re-check
+`running` inside its substep loop, which fired the settle callback twice.
+
+## Build and deploy
 
 ```bash
 npm run build    # → dist/
 npm run lint
 ```
+
+Pushes to `main` run lint, tests, and a build in CI, then publish to GitHub
+Pages. The deploy also copies `legacy/` through as static files, and
+`/shader-playground/` forwards to the site root — that path is linked
+externally, so it has to keep resolving.
+
+`base` defaults to the repository subpath and can be overridden with
+`PUBLIC_BASE_PATH` for a fork or a custom domain.
 
 Requires WebGL 1.0; uses WebGL 2.0 when available.

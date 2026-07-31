@@ -1,4 +1,5 @@
 {
+  "root": true,
   "env": {
     "browser": true,
     "es2021": true
@@ -9,7 +10,12 @@
     "sourceType": "module"
   },
   "rules": {
-    "no-console": "warn",
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["scripts/**/*.js"],
+      "env": { "node": true, "browser": false }
+    }
+  ]
 }

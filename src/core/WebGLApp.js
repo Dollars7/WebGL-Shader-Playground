@@ -11,6 +11,7 @@ import { Skybox } from '../graphics/Skybox.js';
 import { BouncePhysics } from '../graphics/BouncePhysics.js';
 import * as mat4 from '../graphics/mat4.js';
 import { Geometry } from '../geometry/Geometry.js';
+import dropSoundUrl from '../assets/bass-drop.mp3';
 
 // Distance from each model's centre down to its lowest point, used to rest it
 // on the platform instead of burying it.
@@ -47,6 +48,9 @@ export class WebGLApp {
     this.projectionMode = 0; // 0: ortho, 1: perspective
     this.startTime = performance.now();
     this.lastFrameTime = this.startTime;
+
+    const audio = document.getElementById('dropSound');
+    if (audio) audio.src = dropSoundUrl;
 
     console.log('[App] Initialization complete');
   }
