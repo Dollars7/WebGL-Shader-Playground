@@ -6,7 +6,7 @@ fixed-timestep physics drop, driven from a live control panel.
 
 **[▶ Open the live demo](https://dollars7.github.io/WebGL-Shader-Playground/)**
 
-![The playground running the Phong preset on a torus](docs/hero.png)
+![The playground running the Phong preset on a torus](docs/hero.jpg)
 
 ---
 
@@ -44,7 +44,7 @@ surface as if it were a different shape.
 
 | Chrome | Toon | Fresnel |
 | ------ | ---- | ------- |
-| ![Chrome preset](docs/chrome.png) | ![Toon preset](docs/toon.png) | ![Fresnel preset](docs/fresnel.png) |
+| ![Chrome preset](docs/chrome.jpg) | ![Toon preset](docs/toon.jpg) | ![Fresnel preset](docs/fresnel.jpg) |
 
 ---
 
