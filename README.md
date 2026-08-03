@@ -9,6 +9,19 @@ fixed-timestep physics drop, driven from a live control panel.
 ![The playground running the Phong preset on a torus](docs/hero.jpg)
 
 ---
+## Technical Highlights
+
+Built entirely on raw WebGL 1.0 — no Three.js, no rendering framework. Every part of
+the pipeline is hand-written:
+
+- 9 custom GLSL fragment shaders (Phong, Fresnel, toon, procedural materials)
+- Real-time Blinn-Phong lighting computed per-pixel
+- Cubemap reflections
+- Parametric mesh generation
+
+Skipping Three.js was deliberate — the goal was to actually understand the WebGL
+pipeline (buffers, shader compilation, uniform/attribute wiring, render loop) rather
+than delegate it to a library.
 
 ## Background
 
